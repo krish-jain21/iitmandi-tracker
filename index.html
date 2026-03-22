@@ -5,6 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IIT Mandi — Academic Tracker</title>
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
 :root {
   --bg: #070c18;
@@ -234,6 +235,20 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
 .save-toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#22c55e;color:#fff;padding:9px 20px;border-radius:8px;font-size:.82rem;font-weight:700;opacity:0;pointer-events:none;transition:opacity .2s;z-index:200}
 .save-toast.on{opacity:1}
 
+/* ── CONFLICT RESOLVER ── */
+.conflict-slot-block{margin-bottom:18px;padding:14px;background:var(--s2);border-radius:10px;border:1px solid var(--border2)}
+.conflict-slot-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:4px;font-family:'JetBrains Mono',monospace}
+.conflict-slot-time{font-size:.68rem;color:var(--muted);margin-bottom:10px}
+.conflict-options{display:flex;flex-direction:column;gap:6px}
+.conflict-opt{display:flex;align-items:center;gap:10px;padding:9px 12px;border-radius:8px;border:1.5px solid var(--border);cursor:pointer;transition:all .15s}
+.conflict-opt:hover{border-color:var(--accent2);background:rgba(79,142,247,.06)}
+.conflict-opt.selected{border-color:var(--accent);background:rgba(37,99,235,.12)}
+.conflict-opt input[type=radio]{accent-color:var(--accent);width:15px;height:15px;flex-shrink:0}
+.conflict-opt-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+.conflict-opt-info{flex:1}
+.conflict-opt-code{font-family:'JetBrains Mono',monospace;font-size:.75rem;font-weight:700}
+.conflict-opt-name{font-size:.72rem;color:var(--muted);margin-top:1px}
+
 /* ── AI IMPORT ── */
 .drop-zone{border:2px dashed var(--border2);border-radius:10px;padding:20px;text-align:center;cursor:pointer;transition:all .2s;min-height:110px;display:flex;align-items:center;justify-content:center}
 .drop-zone:hover,.drop-zone.drag-over{border-color:var(--accent);background:rgba(37,99,235,.06)}
@@ -384,21 +399,21 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
 
     <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
       <!-- Timetable drop zone -->
-      <div class="drop-zone" id="dz-tt" onclick="document.getElementById('upload-tt').click()" ondragover="dzDrag(event,'dz-tt')" ondragleave="dzLeave('dz-tt')" ondrop="dzDrop(event,'dz-tt','tt')">
-        <input type="file" id="upload-tt" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'tt')">
+      <div class="drop-zone" id="dz-tt" onclick="dzClick(event,'upload-tt')" ondragover="dzDrag(event,'dz-tt')" ondragleave="dzLeave('dz-tt')" ondrop="dzDrop(event,'dz-tt','tt')">
+        <input type="file" id="upload-tt" accept="image/*,.pdf,.xlsx,.xls" style="display:none" onchange="handleUpload(this,'tt')" onclick="event.stopPropagation()">
         <div id="dz-tt-preview" class="dz-preview">
           <div style="font-size:1.5rem">📸</div>
           <div class="small" style="font-weight:600;margin-top:6px">Timetable / Schedule</div>
-          <div class="small muted">Click or drag image here</div>
+          <div class="small muted">Image, PDF or Excel</div>
         </div>
       </div>
       <!-- Calendar drop zone -->
-      <div class="drop-zone" id="dz-cal" onclick="document.getElementById('upload-cal').click()" ondragover="dzDrag(event,'dz-cal')" ondragleave="dzLeave('dz-cal')" ondrop="dzDrop(event,'dz-cal','cal')">
-        <input type="file" id="upload-cal" accept="image/*,.pdf" style="display:none" onchange="handleUpload(this,'cal')">
+      <div class="drop-zone" id="dz-cal" onclick="dzClick(event,'upload-cal')" ondragover="dzDrag(event,'dz-cal')" ondragleave="dzLeave('dz-cal')" ondrop="dzDrop(event,'dz-cal','cal')">
+        <input type="file" id="upload-cal" accept="image/*,.pdf,.xlsx,.xls" style="display:none" onchange="handleUpload(this,'cal')" onclick="event.stopPropagation()">
         <div id="dz-cal-preview" class="dz-preview">
           <div style="font-size:1.5rem">📅</div>
           <div class="small" style="font-weight:600;margin-top:6px">Academic Calendar</div>
-          <div class="small muted">Click or drag image here</div>
+          <div class="small muted">Image, PDF or Excel</div>
         </div>
       </div>
     </div>
@@ -552,7 +567,25 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
   </div>
 </div>
 
+<!-- Conflict Resolution Modal -->
+<div class="overlay" id="modal-conflict">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-title">⚠️ Slot Conflict Detected</div>
+    <div class="small muted mb16" id="conflict-desc">Multiple courses share the same slot. Select the one you're enrolled in for each.</div>
+    <div id="conflict-slots"></div>
+    <div class="modal-actions">
+      <button class="btn btn-p" onclick="resolveConflicts()">✅ Confirm Selection</button>
+    </div>
+  </div>
+</div>
+
 <script>
+// ════════════════════════════════
+//  CORE UTILS (must be first)
+// ════════════════════════════════
+const load = k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } };
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
 // ════════════════════════════════
 //  DATA
 // ════════════════════════════════
@@ -651,9 +684,6 @@ const DEFAULT_HABITS = [
 // ════════════════════════════════
 //  STATE
 // ════════════════════════════════
-const load = k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } };
-const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
-
 let asgns   = load('iit_asgns')   || [...SEED_ASGNS];
 let exams   = load('iit_exams')   || [...SEED_EXAMS];
 let habits  = load('iit_habits')  || [...DEFAULT_HABITS];
@@ -1327,137 +1357,236 @@ document.querySelectorAll('.overlay').forEach(o=>{
 // ════════════════════════════════
 //  AI IMPORT
 // ════════════════════════════════
-let uploadedFiles = { tt: null, cal: null }; // {base64, mediaType}
-let pendingImport = null; // parsed result waiting to be applied
+let uploadedFiles = { tt: null, cal: null };
+let pendingImport = null;
+
+// Fix: prevent event bubbling on drop zone click
+function dzClick(e, inputId) {
+  if(e.target.tagName === 'INPUT') return;
+  document.getElementById(inputId).click();
+}
 
 function dzDrag(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag-over'); }
 function dzLeave(id) { document.getElementById(id).classList.remove('drag-over'); }
 function dzDrop(e, id, type) {
-  e.preventDefault();
-  dzLeave(id);
+  e.preventDefault(); dzLeave(id);
   const file = e.dataTransfer.files[0];
   if(file) loadFile(file, type);
 }
-
 function handleUpload(input, type) {
   const file = input.files[0];
   if(file) loadFile(file, type);
 }
 
+function getFileIcon(name) {
+  if(/\.xlsx?$/i.test(name)) return '📊';
+  if(/\.pdf$/i.test(name)) return '📄';
+  return '🖼️';
+}
+
 function loadFile(file, type) {
-  const reader = new FileReader();
-  reader.onload = (e) => {
-    const dataUrl = e.target.result;
-    const base64 = dataUrl.split(',')[1];
-    const mediaType = file.type || 'image/jpeg';
-    uploadedFiles[type] = { base64, mediaType, name: file.name };
+  const dzId    = type==='tt' ? 'dz-tt'         : 'dz-cal';
+  const prevId  = type==='tt' ? 'dz-tt-preview'  : 'dz-cal-preview';
+  const dz      = document.getElementById(dzId);
+  dz.classList.remove('drag-over');
+  dz.classList.add('has-file');
+  document.getElementById('parse-status').textContent = '';
+  document.getElementById('import-preview').style.display = 'none';
 
-    const dzId = type==='tt' ? 'dz-tt' : 'dz-cal';
-    const previewId = type==='tt' ? 'dz-tt-preview' : 'dz-cal-preview';
-    const dz = document.getElementById(dzId);
-    dz.classList.remove('drag-over');
-    dz.classList.add('has-file');
+  const isImage = file.type.startsWith('image/');
+  const isPDF   = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  const isExcel = /\.xlsx?$/i.test(file.name) || file.type.includes('spreadsheet') || file.type.includes('excel');
 
-    const isImage = file.type.startsWith('image/');
-    document.getElementById(previewId).innerHTML = isImage
-      ? `<img src="${dataUrl}" class="dz-thumb"><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div>`
-      : `<div style="font-size:1.5rem">📄</div><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div>`;
-    document.getElementById('parse-status').textContent = '';
-    document.getElementById('import-preview').style.display = 'none';
-  };
-  reader.readAsDataURL(file);
+  if(isExcel) {
+    // Use SheetJS to convert Excel → plain text for Claude
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        let text = '';
+        wb.SheetNames.forEach(name => {
+          text += `\n--- Sheet: ${name} ---\n`;
+          text += XLSX.utils.sheet_to_csv(wb.Sheets[name]);
+        });
+        uploadedFiles[type] = { kind:'text', text, name: file.name };
+        document.getElementById(prevId).innerHTML =
+          `<div style="font-size:1.5rem">📊</div><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div><div class="small muted">Excel parsed ✓</div>`;
+      } catch(err) {
+        setParseStatus('❌ Could not read Excel file: ' + err.message, 'err');
+        dz.classList.remove('has-file');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+
+  } else if(isPDF) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64  = dataUrl.split(',')[1];
+      uploadedFiles[type] = { kind:'pdf', base64, mediaType:'application/pdf', name: file.name };
+      document.getElementById(prevId).innerHTML =
+        `<div style="font-size:1.5rem">📄</div><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div>`;
+    };
+    reader.readAsDataURL(file);
+
+  } else if(isImage) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64  = dataUrl.split(',')[1];
+      uploadedFiles[type] = { kind:'image', base64, mediaType: file.type||'image/jpeg', name: file.name };
+      document.getElementById(prevId).innerHTML =
+        `<img src="${dataUrl}" class="dz-thumb"><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div>`;
+    };
+    reader.readAsDataURL(file);
+
+  } else {
+    setParseStatus('⚠️ Unsupported file type. Use image, PDF or Excel.', 'warn');
+    dz.classList.remove('has-file');
+  }
+}
+
+function buildContentBlock(f, label) {
+  if(!f) return [];
+  const blocks = [];
+  if(f.kind === 'image') {
+    blocks.push({ type:'image', source:{ type:'base64', media_type: f.mediaType, data: f.base64 }});
+    blocks.push({ type:'text', text: `The image above is a ${label}.` });
+  } else if(f.kind === 'pdf') {
+    blocks.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data: f.base64 }});
+    blocks.push({ type:'text', text: `The document above is a ${label}.` });
+  } else if(f.kind === 'text') {
+    blocks.push({ type:'text', text: `The following CSV/text data is from an Excel file and represents a ${label}:\n${f.text}` });
+  }
+  return blocks;
 }
 
 async function runAIImport() {
   if(!uploadedFiles.tt && !uploadedFiles.cal) {
-    setParseStatus('⚠️ Please upload at least one image first.', 'warn'); return;
+    setParseStatus('⚠️ Please upload at least one file first.', 'warn'); return;
   }
   const btn = document.getElementById('parse-btn');
   btn.innerHTML = '<span class="parse-spinner"></span>Parsing…';
   btn.disabled = true;
-  setParseStatus('Claude is reading your images…', '');
+  setParseStatus('Claude is reading your files…', '');
 
   try {
-    // Build message content with all uploaded images
-    const content = [];
-    if(uploadedFiles.tt) {
-      content.push({ type:'image', source:{ type:'base64', media_type: uploadedFiles.tt.mediaType, data: uploadedFiles.tt.base64 }});
-      content.push({ type:'text', text:'The image above is a TIMETABLE / COURSE SCHEDULE.' });
-    }
-    if(uploadedFiles.cal) {
-      content.push({ type:'image', source:{ type:'base64', media_type: uploadedFiles.cal.mediaType, data: uploadedFiles.cal.base64 }});
-      content.push({ type:'text', text:'The image above is an ACADEMIC CALENDAR.' });
-    }
-    content.push({ type:'text', text: `
-You are parsing a university timetable and/or academic calendar for IIT Mandi.
+    // ── PASS 1: Extract raw text row by row ──
+    setParseStatus('Pass 1/2 — Reading every row…', '');
+    const pass1Content = [
+      ...buildContentBlock(uploadedFiles.tt,  'TIMETABLE / COURSE SCHEDULE'),
+      ...buildContentBlock(uploadedFiles.cal, 'ACADEMIC CALENDAR'),
+      { type:'text', text:`
+Look at this timetable/calendar image very carefully.
 
-Extract ALL information and return ONLY valid JSON (no markdown, no explanation) in this exact structure:
+TASK: List EVERY single row you can see in the course/timetable table. Do not skip any row.
+
+For the timetable, output each row like this (one per line):
+ROW: <Sr.No> | <Course Code> | <Course Name> | <Credits> | <Slot> | <Room> | <Campus>
+
+For the lab schedule table, output each row like this:
+LAB: <Course Code> | Mon=<group> | Tue=<group> | Wed=<group> | Thu=<group> | Fri=<group> | Time=<time>
+
+For calendar events, output each event like this:
+CAL: <date as DD/MM/YYYY> | <event name> | <details>
+
+Rules:
+- Read EVERY row, even if text is small or partially cut off
+- For slot column: if it says "B + Lab slot" write "B+LAB", if just "Lab slot" write "LAB", if "NS" write "NS"
+- Do NOT skip rows, do NOT summarize — list each row individually
+- If you cannot read something clearly, write UNCLEAR for that field
+      `}
+    ];
+
+    const pass1Res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:4000, messages:[{role:'user', content:pass1Content}] })
+    });
+    const pass1Data = await pass1Res.json();
+    if(pass1Data.error) throw new Error(pass1Data.error.message);
+    const rawRows = pass1Data.content.find(b=>b.type==='text')?.text || '';
+    if(!rawRows.trim()) throw new Error('Could not read the image. Try a clearer photo.');
+
+    // ── PASS 2: Convert raw rows → structured JSON ──
+    setParseStatus('Pass 2/2 — Structuring data…', '');
+
+    const pass2Content = [
+      { type:'text', text:`
+You extracted the following raw data from an IIT Mandi timetable/calendar image:
+
+${rawRows}
+
+Now convert this into structured JSON. Use the IIT Mandi slot system:
+- Slot A = Mon/Wed/Fri 9:00–9:50 AM
+- Slot B = Mon/Wed/Fri 11:00–11:50 AM
+- Slot C = Tue/Thu 10:00–10:50 AM
+- Slot D = Mon/Wed/Fri 10:00–10:50 AM
+- Slot E = Tue/Thu 11:00–11:50 AM
+- Slot F = Mon/Wed/Fri 12:00–12:50 PM
+- Slot G = Tue/Thu 12:00–12:50 PM
+- Slot H = Thu 9:00–9:50 AM
+- B+LAB = slot is "B" (lab handled separately)
+- F+LAB = slot is "F"
+- G+LAB = slot is "G"
+- LAB = slot is "LAB"
+- NS = no slot, skip this course
+
+KNOWN COURSES at IIT Mandi (Even Sem 2026) — if you see any of these in the raw rows, ALWAYS include them:
+- IC-115 = "Ode and Integral Transform" (also written as "ODE & Integral Transform") → Slot E
+- IC-113 = "Complex and Vector Calculus" → Slot C
+- IC-253 = "Programming and Data Structures" → Slot A
+- IC-252 = "Probability and Statistics" → Slot B (also has Lab)
+- IC-161 = "Applied Electronics" → Slot D
+- IC-102P = "Foundations of Design Practice" → Slot F (also has Lab)
+- IC-140 = "Graphics for Design" → Slot G (also has Lab)
+- CE-202 = "Introduction to Civil Engineering" → Slot H
+- IC-161P = "Applied Electronics Lab" → LAB
+- IC-222P = "Physics Practicum" → LAB
+- IC-010 = "Internship" → skip (NS slot)
+
+Assign each course a different color from: #4ade80, #60a5fa, #f87171, #fbbf24, #818cf8, #38bdf8, #34d399, #a78bfa, #f472b6, #fb923c, #84cc16, #0ea5e9, #e879f9, #2dd4bf, #94a3b8
+
+Return ONLY this JSON (no markdown, no backticks, no explanation):
 {
   "courses": [
-    {
-      "code": "IC-253",
-      "name": "Programming and Data Structures",
-      "short": "DSA / PDS",
-      "slot": "A",
-      "room": "A18-1",
-      "credits": 3,
-      "color": "#4ade80"
-    }
+    { "code":"IC-253", "name":"Programming and Data Structures", "short":"DSA", "slot":"A", "room":"A18-1", "credits":3, "color":"#4ade80" }
   ],
   "calendarEvents": [
-    {
-      "date": "2026-01-05",
-      "name": "Classes Begin",
-      "sub": "Even Semester starts"
-    }
+    { "date":"2026-01-05", "name":"Classes Begin", "sub":"Even Semester 2026 starts" }
   ],
-  "semesterInfo": {
-    "name": "Even Semester 2026",
-    "startDate": "2026-01-05",
-    "endDate": "2026-05-02"
-  },
+  "semesterInfo": { "name":"Even Semester 2026", "startDate":"2026-01-05", "endDate":"2026-05-02" },
   "labSchedule": [
-    {
-      "courseCode": "IC-161P",
-      "Mon": "G1", "Tue": "G2", "Wed": "G3", "Thu": "G4", "Fri": "—",
-      "time": "2:00–5:00 PM"
-    }
+    { "courseCode":"IC-161P", "Mon":"G1", "Tue":"G2", "Wed":"G3", "Thu":"G4", "Fri":"—", "time":"2:00–5:00 PM" }
   ]
 }
 
-Rules:
-- Only include courses the student is actually enrolled in (not all courses in the university)
-- Assign a distinct hex color to each course (use vibrant colors like #4ade80, #60a5fa, #f87171, #fbbf24, #818cf8, #38bdf8, #34d399, #a78bfa, #f472b6, #fb923c, #84cc16, #0ea5e9)
-- Slots are single letters A-H or LAB for lab courses
-- For calendarEvents, include: semester start/end, mid-sem dates, mid-break, end-sem exam dates, add/drop deadlines, holidays
-- Dates must be in YYYY-MM-DD format
-- If a section is not visible in the image, return an empty array [] for that field
-- Return ONLY the JSON object, nothing else
-    `});
+RULES:
+- Include ALL courses from the ROW: lines — do not drop any
+- "Ode" or "ODE" at the start of a course name = IC-115, Slot E — NEVER skip this
+- Skip only courses with slot "NS" or "UNCLEAR"
+- Dates must be YYYY-MM-DD
+- If multiple courses have the same slot letter, include ALL of them
+- Return ONLY the raw JSON object
+      `}
+    ];
 
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 4000,
-        messages: [{ role: 'user', content }]
-      })
+    const pass2Res = await fetch('https://api.anthropic.com/v1/messages', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:6000, messages:[{role:'user', content:pass2Content}] })
     });
+    const pass2Data = await pass2Res.json();
+    if(pass2Data.error) throw new Error(pass2Data.error.message);
 
-    const data = await response.json();
-    if(data.error) throw new Error(data.error.message);
-
-    const rawText = data.content.find(b=>b.type==='text')?.text || '';
-    // Strip any accidental markdown fences
-    const jsonStr = rawText.replace(/```json|```/g,'').trim();
-    const parsed = JSON.parse(jsonStr);
+    const rawText = pass2Data.content.find(b=>b.type==='text')?.text || '';
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Could not structure the data. Try again.');
+    const parsed = JSON.parse(jsonMatch[0]);
     pendingImport = parsed;
     showImportPreview(parsed);
-    setParseStatus('✓ Parsing complete! Review below.', 'ok');
+    setParseStatus(`✓ Found ${parsed.courses?.length||0} courses, ${parsed.calendarEvents?.length||0} calendar events. Review below.`, 'ok');
 
   } catch(err) {
-    setParseStatus('❌ Error: ' + err.message, 'err');
+    setParseStatus('❌ ' + err.message, 'err');
     console.error(err);
   } finally {
     btn.innerHTML = '✨ Parse &amp; Import';
@@ -1559,13 +1688,15 @@ function applyImport() {
   ['dz-tt','dz-cal'].forEach(id => {
     document.getElementById(id).classList.remove('has-file');
   });
-  document.getElementById('dz-tt-preview').innerHTML = `<div style="font-size:1.5rem">📸</div><div class="small" style="font-weight:600;margin-top:6px">Timetable / Schedule</div><div class="small muted">Click or drag image here</div>`;
-  document.getElementById('dz-cal-preview').innerHTML = `<div style="font-size:1.5rem">📅</div><div class="small" style="font-weight:600;margin-top:6px">Academic Calendar</div><div class="small muted">Click or drag image here</div>`;
+  document.getElementById('dz-tt-preview').innerHTML  = `<div style="font-size:1.5rem">📸</div><div class="small" style="font-weight:600;margin-top:6px">Timetable / Schedule</div><div class="small muted">Image, PDF or Excel</div>`;
+  document.getElementById('dz-cal-preview').innerHTML = `<div style="font-size:1.5rem">📅</div><div class="small" style="font-weight:600;margin-top:6px">Academic Calendar</div><div class="small muted">Image, PDF or Excel</div>`;
 
   renderSettings();
   renderToday();
   showToast('✅ Tracker updated from import!');
   setParseStatus('', '');
+  // Check for conflicts in newly imported courses
+  setTimeout(() => detectAndResolveConflicts(() => { renderToday(); renderSettings(); }), 300);
 }
 
 function cancelImport() {
@@ -1575,9 +1706,95 @@ function cancelImport() {
 }
 
 // ════════════════════════════════
+//  CONFLICT RESOLVER
+// ════════════════════════════════
+let conflictData = {}; // slot → [courses]
+
+function detectAndResolveConflicts(onDone) {
+  // Group courses by slot (excluding LAB)
+  const slotMap = {};
+  COURSES.forEach(c => {
+    if(!c.slot || c.slot === 'LAB' || c.slot === '') return;
+    if(!slotMap[c.slot]) slotMap[c.slot] = [];
+    slotMap[c.slot].push(c);
+  });
+
+  // Find slots with more than one course
+  const conflicts = Object.entries(slotMap).filter(([,courses]) => courses.length > 1);
+
+  if(!conflicts.length) { if(onDone) onDone(); return; }
+
+  conflictData = {};
+  conflicts.forEach(([slot, courses]) => conflictData[slot] = courses);
+
+  // Build modal content
+  let html = '';
+  conflicts.forEach(([slot, courses]) => {
+    const time = SLOT_TIMES[slot] || '';
+    html += `<div class="conflict-slot-block">
+      <div class="conflict-slot-label">Slot ${slot}</div>
+      <div class="conflict-slot-time">${time}</div>
+      <div class="conflict-options" id="conflict-opts-${slot}">
+        ${courses.map((c,i) => `
+          <label class="conflict-opt" id="conflict-lbl-${slot}-${c.code}" onclick="selectConflictOpt('${slot}','${c.code}')">
+            <input type="radio" name="conflict-${slot}" value="${c.code}" ${i===0?'checked':''}>
+            <div class="conflict-opt-dot" style="background:${c.color}"></div>
+            <div class="conflict-opt-info">
+              <div class="conflict-opt-code" style="color:${c.color}">${c.code}</div>
+              <div class="conflict-opt-name">${c.name||c.short}</div>
+            </div>
+            <span class="badge b-gray">📍 ${c.room||'—'}</span>
+          </label>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('conflict-slots').innerHTML = html;
+  document.getElementById('conflict-desc').textContent =
+    `${conflicts.length} slot${conflicts.length>1?'s have':'has'} multiple courses. Pick the one you actually attend for each.`;
+
+  // Pre-select first option styling
+  conflicts.forEach(([slot, courses]) => {
+    selectConflictOpt(slot, courses[0].code);
+  });
+
+  // Store callback
+  window._conflictDone = onDone;
+  document.getElementById('modal-conflict').classList.add('on');
+}
+
+function selectConflictOpt(slot, code) {
+  const opts = document.querySelectorAll(`#conflict-opts-${slot} .conflict-opt`);
+  opts.forEach(el => el.classList.remove('selected'));
+  const radio = document.querySelector(`#conflict-opts-${slot} input[value="${code}"]`);
+  if(radio) {
+    radio.checked = true;
+    radio.closest('.conflict-opt').classList.add('selected');
+  }
+}
+
+function resolveConflicts() {
+  Object.keys(conflictData).forEach(slot => {
+    const radio = document.querySelector(`input[name="conflict-${slot}"]:checked`);
+    if(!radio) return;
+    const chosen = radio.value;
+    // Remove this slot from ALL courses in that slot, then re-assign to chosen
+    COURSES.forEach(c => { if(c.slot === slot) c.slot = ''; });
+    const c = COURSES.find(x => x.code === chosen);
+    if(c) c.slot = slot;
+  });
+
+  save('iit_courses', COURSES);
+  document.getElementById('modal-conflict').classList.remove('on');
+  showToast('✅ Slots resolved!');
+
+  if(window._conflictDone) { window._conflictDone(); window._conflictDone = null; }
+  else { renderToday(); renderSettings(); }
+}
+
+// ════════════════════════════════
 //  INIT
 // ════════════════════════════════
-// Load persisted cal events and lab sched if any
 (()=>{
   const savedCal = load('iit_cal_events');
   if(savedCal?.length) { CAL_EVENTS.length=0; savedCal.forEach(e=>CAL_EVENTS.push(e)); }
@@ -1586,6 +1803,8 @@ function cancelImport() {
     LAB_SCHED.length=0;
     savedLab.forEach(l=>LAB_SCHED.push([l.courseCode,{Mon:l.Mon||'—',Tue:l.Tue||'—',Wed:l.Wed||'—',Thu:l.Thu||'—',Fri:l.Fri||'—'},l.time||'2:00–5:00 PM']));
   }
+  // Check for conflicts on startup (e.g. after AI import)
+  detectAndResolveConflicts(() => { renderToday(); });
 })();
 
 renderToday();
