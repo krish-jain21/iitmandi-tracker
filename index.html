@@ -482,7 +482,7 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
   <div class="card mb16" id="import-card">
     <div class="between mb4">
       <div class="bold" style="font-size:.92rem">🤖 AI Import — Upload Timetable &amp; Calendar</div>
-      <span class="badge b-blue">Powered by Gemini</span>
+      <span class="badge b-blue">Powered by Claude</span>
     </div>
     <div class="small muted mb14">Upload a photo of your timetable and/or academic calendar. Claude will read it and automatically populate your courses, slots, rooms, and key semester dates.</div>
 
@@ -1690,17 +1690,17 @@ function loadFile(file, type) {
 
 function buildContentBlock(f, label) {
   if(!f) return [];
-  const parts = [];
+  const blocks = [];
   if(f.kind === 'image') {
-    parts.push({ inlineData: { mimeType: f.mediaType, data: f.base64 } });
-    parts.push({ text: `The image above is a ${label}.` });
+    blocks.push({ type:'image', source:{ type:'base64', media_type: f.mediaType, data: f.base64 }});
+    blocks.push({ type:'text', text: `The image above is a ${label}.` });
   } else if(f.kind === 'pdf') {
-    parts.push({ inlineData: { mimeType: 'application/pdf', data: f.base64 } });
-    parts.push({ text: `The document above is a ${label}.` });
+    blocks.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data: f.base64 }});
+    blocks.push({ type:'text', text: `The document above is a ${label}.` });
   } else if(f.kind === 'text') {
-    parts.push({ text: `The following CSV/text data is from an Excel file and represents a ${label}:\n${f.text}` });
+    blocks.push({ type:'text', text: `The following CSV/text data is from an Excel file and represents a ${label}:\n${f.text}` });
   }
-  return parts;
+  return blocks;
 }
 
 async function runAIImport() {
@@ -1715,10 +1715,10 @@ async function runAIImport() {
   try {
     // ── PASS 1: Extract raw text row by row ──
     setParseStatus('Pass 1/2 — Reading every row…', '');
-    const pass1Parts = [
+    const pass1Content = [
       ...buildContentBlock(uploadedFiles.tt,  'TIMETABLE / COURSE SCHEDULE'),
       ...buildContentBlock(uploadedFiles.cal, 'ACADEMIC CALENDAR'),
-      { text:`
+      { type:'text', text:`
 Look at this timetable/calendar image very carefully.
 
 TASK: List EVERY single row you can see in the course/timetable table. Do not skip any row.
@@ -1742,24 +1742,18 @@ Rules:
 
     const pass1Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model: 'gemini-1.5-flash',
-        geminiPayload: {
-          contents: [{ parts: pass1Parts }],
-          generationConfig: { maxOutputTokens: 4000, temperature: 0.1 }
-        }
-      })
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4000, messages:[{role:'user', content:pass1Content}] })
     });
     const pass1Data = await pass1Res.json();
     if(pass1Data.error) throw new Error(pass1Data.error.message);
-    const rawRows = pass1Data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const rawRows = pass1Data.content?.find(b=>b.type==='text')?.text || '';
     if(!rawRows.trim()) throw new Error('Could not read the image. Try a clearer photo.');
 
     // ── PASS 2: Convert raw rows → structured JSON ──
     setParseStatus('Pass 2/2 — Structuring data…', '');
 
-    const pass2Parts = [
-      { text:`
+    const pass2Content = [
+      { type:'text', text:`
 You extracted the following raw data from an IIT Mandi timetable/calendar image:
 
 ${rawRows}
@@ -1820,18 +1814,12 @@ RULES:
 
     const pass2Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body: JSON.stringify({
-        model: 'gemini-1.5-flash',
-        geminiPayload: {
-          contents: [{ parts: pass2Parts }],
-          generationConfig: { maxOutputTokens: 6000, temperature: 0.1 }
-        }
-      })
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:6000, messages:[{role:'user', content:pass2Content}] })
     });
     const pass2Data = await pass2Res.json();
     if(pass2Data.error) throw new Error(pass2Data.error.message);
 
-    const rawText = pass2Data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    const rawText = pass2Data.content?.find(b=>b.type==='text')?.text || '';
     const jsonMatch = rawText.match(/\{[\s\S]*\}/);
     if(!jsonMatch) throw new Error('Could not structure the data. Try again.');
     const parsed = JSON.parse(jsonMatch[0]);
