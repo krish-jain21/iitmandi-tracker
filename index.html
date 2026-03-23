@@ -1692,10 +1692,10 @@ function buildContentBlock(f, label) {
   if(!f) return [];
   const parts = [];
   if(f.kind === 'image') {
-    parts.push({ inline_data: { mime_type: f.mediaType, data: f.base64 } });
+    parts.push({ inlineData: { mimeType: f.mediaType, data: f.base64 } });
     parts.push({ text: `The image above is a ${label}.` });
   } else if(f.kind === 'pdf') {
-    parts.push({ inline_data: { mime_type: 'application/pdf', data: f.base64 } });
+    parts.push({ inlineData: { mimeType: 'application/pdf', data: f.base64 } });
     parts.push({ text: `The document above is a ${label}.` });
   } else if(f.kind === 'text') {
     parts.push({ text: `The following CSV/text data is from an Excel file and represents a ${label}:\n${f.text}` });
