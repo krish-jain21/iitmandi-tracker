@@ -829,6 +829,9 @@ const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
 // Cloudflare Worker proxy URL — update this after deploying your worker
 const PROXY_URL = load('iit_proxy_url') || 'https://iitmandi-proxy.krish210005.workers.dev';
 
+// Cloudflare Worker secret — update this to match your worker's environment variable
+const WORKER_SECRET = load('iit_worker_secret') || 'iitmandi_krish_2026';
+
 // ════════════════════════════════
 //  DATA
 // ════════════════════════════════
@@ -1678,7 +1681,7 @@ Rules:
     ];
 
     const pass1Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
       body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4000, messages:[{role:'user', content:pass1Content}] })
     });
     const pass1Data = await pass1Res.json();
@@ -1750,7 +1753,7 @@ RULES:
     ];
 
     const pass2Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
       body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:6000, messages:[{role:'user', content:pass2Content}] })
     });
     const pass2Data = await pass2Res.json();
@@ -2330,7 +2333,7 @@ async function generateNotes() {
   try {
     // ── PASS 1: Generate detailed notes ──
     const notesRes = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
       body: JSON.stringify({
         model:'claude-haiku-4-5-20251001', max_tokens:4000,
         messages:[{ role:'user', content:[
@@ -2389,7 +2392,7 @@ Be thorough. Cover EVERY concept shown. Use clear headers and formatting.`
     // ── PASS 2: Generate flowchart ──
     setNotesStatus('Step 2/2 — Building flowchart…', '');
     const flowRes = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
-      method:'POST', headers:{'Content-Type':'application/json'},
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
       body: JSON.stringify({
         model:'claude-haiku-4-5-20251001', max_tokens:3000,
         messages:[{ role:'user', content:[
