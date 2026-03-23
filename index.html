@@ -548,47 +548,56 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
       </div>
     </div>
 
-    <!-- RIGHT: AI Tutor -->
-    <div style="display:flex;flex-direction:column;height:calc(100vh - 120px)">
-      <div class="card" style="flex:1;display:flex;flex-direction:column;overflow:hidden">
-        <div class="between mb12">
-          <div class="bold" style="font-size:.95rem">🤖 AI Study Assistant</div>
-          <div class="row" style="gap:6px">
-            <select class="sel" id="tutor-course" style="font-size:.75rem;padding:5px 8px">
-              <option value="">General</option>
-            </select>
-            <button class="btn btn-g btn-sm" onclick="clearChat()">🗑 Clear</button>
+    <!-- RIGHT: Notes + Flowchart Generator -->
+    <div style="display:flex;flex-direction:column;gap:12px">
+
+      <!-- Upload card -->
+      <div class="card">
+        <div class="between mb4">
+          <div class="bold" style="font-size:.95rem">📄 Notes &amp; Flowchart Generator</div>
+          <span class="badge b-blue">Powered by Claude</span>
+        </div>
+        <div class="small muted mb12">Upload any lecture PDF, slides or photo — Claude will generate beautiful detailed notes and a visual flowchart.</div>
+
+        <!-- Drop zone -->
+        <div class="drop-zone" id="notes-dz" onclick="dzClick(event,'notes-file')" ondragover="dzDrag(event,'notes-dz')" ondragleave="dzLeave('notes-dz')" ondrop="notesDrop(event)">
+          <input type="file" id="notes-file" accept="image/*,.pdf" style="display:none" onchange="handleNotesFile(this)" onclick="event.stopPropagation()">
+          <div id="notes-dz-preview" class="dz-preview">
+            <div style="font-size:2rem">📚</div>
+            <div class="small" style="font-weight:600;margin-top:6px">Drop your PDF or image here</div>
+            <div class="small muted">Lecture notes, slides, textbook pages</div>
           </div>
         </div>
 
-        <!-- File upload for context -->
-        <div class="card2 mb10" style="padding:8px 12px">
-          <div class="row" style="gap:8px">
-            <div style="font-size:.75rem;color:var(--muted);flex:1" id="tutor-file-name">📎 Upload notes/PDF for context (optional)</div>
-            <label style="cursor:pointer">
-              <input type="file" id="tutor-file" accept="image/*,.pdf" style="display:none" onchange="handleTutorFile(this)">
-              <span class="btn btn-g btn-sm">Upload</span>
-            </label>
-            <button class="ibtn" onclick="clearTutorFile()" id="tutor-file-clear" style="display:none">✕</button>
-          </div>
+        <div class="row mt12" style="gap:8px">
+          <button class="btn btn-p" id="notes-gen-btn" onclick="generateNotes()" style="flex:1" disabled>✨ Generate Notes &amp; Flowchart</button>
+          <button class="btn btn-g" onclick="clearNotesFile()">✕ Clear</button>
         </div>
-
-        <!-- Chat messages -->
-        <div id="tutor-chat" style="flex:1;overflow-y:auto;display:flex;flex-direction:column;gap:10px;padding:4px 0;min-height:200px">
-          <div class="tutor-msg tutor-ai">
-            <div class="tutor-bubble">👋 Hi! I'm your AI study assistant powered by Claude. Ask me anything about your courses, upload your notes and I'll help you understand them, or just quiz me on a topic!</div>
-          </div>
-        </div>
-
-        <!-- Input -->
-        <div class="row mt10" style="gap:8px;flex-shrink:0">
-          <input class="inp" id="tutor-input" placeholder="Ask anything… e.g. Explain skip lists, Summarize this PDF…"
-            onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendTutorMsg()}">
-          <button class="btn btn-p" onclick="sendTutorMsg()" id="tutor-send" style="flex-shrink:0">Send</button>
-        </div>
+        <div id="notes-status" class="small muted mt8"></div>
       </div>
-    </div>
 
+      <!-- Output area -->
+      <div class="card" id="notes-output-card" style="display:none">
+        <div class="between mb12">
+          <div class="bold" style="font-size:.95rem">📋 Generated Notes</div>
+          <div class="row" style="gap:6px">
+            <button class="btn btn-g btn-sm" onclick="copyNotes()">📋 Copy</button>
+            <button class="btn btn-g btn-sm" onclick="downloadNotes()">⬇ Download</button>
+          </div>
+        </div>
+        <div id="notes-content" style="font-size:.82rem;line-height:1.8;color:var(--text)"></div>
+      </div>
+
+      <!-- Flowchart output -->
+      <div class="card" id="flow-output-card" style="display:none">
+        <div class="between mb12">
+          <div class="bold" style="font-size:.95rem">🔀 Concept Flowchart</div>
+          <button class="btn btn-g btn-sm" onclick="downloadFlowchart()">⬇ Download SVG</button>
+        </div>
+        <div id="flow-content" style="overflow-x:auto"></div>
+      </div>
+
+    </div>
   </div>
 </div>
 
@@ -2139,10 +2148,6 @@ function initPomoDisplay() {
   document.getElementById('dur-focus').value = pomoDurations.focus;
   document.getElementById('dur-short').value = pomoDurations.short;
   document.getElementById('dur-long').value  = pomoDurations.long;
-  // Populate course selector
-  const sel = document.getElementById('tutor-course');
-  sel.innerHTML = '<option value="">General</option>' +
-    COURSES.map(c=>`<option value="${c.code}">${c.code} — ${c.short}</option>`).join('');
   // Load today stats
   const today = studyLog[TODAY] || {focusMins:0, sessions:0};
   pomoSessions = today.sessions;
@@ -2271,125 +2276,216 @@ function renderStudyWeek() {
   }).join('');
 }
 
-// ── AI TUTOR ──
-let tutorHistory = [];
-let tutorFile = null; // {base64, mediaType, name}
+// ── NOTES + FLOWCHART GENERATOR ──
+let notesFile = null;
+let lastNotesText = '';
+let lastFlowSVG  = '';
 
-function handleTutorFile(input) {
-  const file = input.files[0]; if(!file) return;
+function notesDrop(e) {
+  e.preventDefault(); dzLeave('notes-dz');
+  const file = e.dataTransfer.files[0];
+  if(file) loadNotesFile(file);
+}
+function handleNotesFile(input) {
+  const file = input.files[0]; if(file) loadNotesFile(file);
+}
+function loadNotesFile(file) {
   const reader = new FileReader();
+  const isImg = file.type.startsWith('image/');
   reader.onload = e => {
     const dataUrl = e.target.result;
-    tutorFile = { base64: dataUrl.split(',')[1], mediaType: file.type||'image/jpeg', name: file.name, isImage: file.type.startsWith('image/') };
-    document.getElementById('tutor-file-name').textContent = `📎 ${file.name}`;
-    document.getElementById('tutor-file-clear').style.display='inline-flex';
-    appendTutorMsg('ai', `📎 Got it! I can see **${file.name}**. Ask me anything about it.`);
+    notesFile = { base64: dataUrl.split(',')[1], mediaType: file.type||'image/jpeg', name: file.name, isImg };
+    const dz = document.getElementById('notes-dz');
+    dz.classList.add('has-file');
+    document.getElementById('notes-dz-preview').innerHTML = isImg
+      ? `<img src="${dataUrl}" class="dz-thumb"><div class="small" style="color:var(--success);font-weight:600">✓ ${file.name}</div>`
+      : `<div style="font-size:2rem">📄</div><div class="small" style="color:var(--success);font-weight:600">✓ ${file.name}</div>`;
+    document.getElementById('notes-gen-btn').disabled = false;
+    document.getElementById('notes-status').textContent = '';
   };
   reader.readAsDataURL(file);
 }
-
-function clearTutorFile() {
-  tutorFile = null;
-  document.getElementById('tutor-file-name').textContent = '📎 Upload notes/PDF for context (optional)';
-  document.getElementById('tutor-file-clear').style.display='none';
-  document.getElementById('tutor-file').value='';
+function clearNotesFile() {
+  notesFile = null;
+  document.getElementById('notes-dz').classList.remove('has-file');
+  document.getElementById('notes-dz-preview').innerHTML = `<div style="font-size:2rem">📚</div><div class="small" style="font-weight:600;margin-top:6px">Drop your PDF or image here</div><div class="small muted">Lecture notes, slides, textbook pages</div>`;
+  document.getElementById('notes-gen-btn').disabled = true;
+  document.getElementById('notes-file').value = '';
+  document.getElementById('notes-output-card').style.display = 'none';
+  document.getElementById('flow-output-card').style.display  = 'none';
+  document.getElementById('notes-status').textContent = '';
 }
 
-function clearChat() {
-  tutorHistory = [];
-  document.getElementById('tutor-chat').innerHTML = `<div class="tutor-msg tutor-ai">
-    <div class="tutor-avatar">🤖</div>
-    <div class="tutor-bubble">👋 Hi! I'm your AI study assistant. Ask me anything about your courses, upload your notes and I'll help you understand them!</div>
-  </div>`;
-}
+async function generateNotes() {
+  if(!notesFile) return;
+  const btn = document.getElementById('notes-gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="parse-spinner"></span> Generating…';
+  setNotesStatus('Step 1/2 — Reading your document…', '');
 
-function appendTutorMsg(role, text) {
-  const chat = document.getElementById('tutor-chat');
-  const isUser = role==='user';
-  // Convert **bold** markdown
-  const html = text.replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')
-    .replace(/`(.*?)`/g,'<code style="background:rgba(255,255,255,.1);padding:1px 5px;border-radius:3px;font-family:monospace">$1</code>')
-    .replace(/\n/g,'<br>');
-  const div = document.createElement('div');
-  div.className = `tutor-msg ${isUser?'tutor-user':'tutor-ai'}`;
-  div.innerHTML = `
-    <div class="tutor-avatar">${isUser?'👤':'🤖'}</div>
-    <div class="tutor-bubble">${html}</div>`;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function showTyping() {
-  const chat = document.getElementById('tutor-chat');
-  const div = document.createElement('div');
-  div.className = 'tutor-msg tutor-ai'; div.id = 'tutor-typing';
-  div.innerHTML = `<div class="tutor-avatar">🤖</div>
-    <div class="tutor-bubble"><div class="tutor-typing"><span></span><span></span><span></span></div></div>`;
-  chat.appendChild(div);
-  chat.scrollTop = chat.scrollHeight;
-}
-
-function removeTyping() {
-  const t = document.getElementById('tutor-typing');
-  if(t) t.remove();
-}
-
-async function sendTutorMsg() {
-  const inp = document.getElementById('tutor-input');
-  const text = inp.value.trim(); if(!text) return;
-  const courseCode = document.getElementById('tutor-course').value;
-  const course = courseCode ? COURSES.find(c=>c.code===courseCode) : null;
-
-  appendTutorMsg('user', text);
-  inp.value = '';
-  document.getElementById('tutor-send').disabled = true;
-  showTyping();
-
-  // Build message content
-  const userContent = [];
-  if(tutorFile) {
-    if(tutorFile.isImage) {
-      userContent.push({type:'image', source:{type:'base64', media_type:tutorFile.mediaType, data:tutorFile.base64}});
-    } else {
-      userContent.push({type:'document', source:{type:'base64', media_type:'application/pdf', data:tutorFile.base64}});
-    }
-  }
-  userContent.push({type:'text', text});
-
-  // Build system prompt
-  const sysPrompt = `You are an expert AI study assistant for a 2nd semester BTech student at IIT Mandi.
-${course ? `The student is currently studying: ${course.name} (${course.code}).` : 'Help with any academic topic.'}
-Be concise, clear, and use examples. Format math with plain text. Use bullet points for lists.
-If asked to explain a concept, use simple analogies. If asked to quiz, create 3-5 questions.
-Current courses: ${COURSES.filter(c=>c.slot!=='LAB'&&c.slot).map(c=>c.code+' '+c.short).join(', ')}.`;
-
-  tutorHistory.push({role:'user', content: userContent});
-  // Keep last 10 turns for context
-  const msgs = tutorHistory.slice(-10);
+  const fileBlock = notesFile.isImg
+    ? { type:'image', source:{ type:'base64', media_type: notesFile.mediaType, data: notesFile.base64 }}
+    : { type:'document', source:{ type:'base64', media_type:'application/pdf', data: notesFile.base64 }};
 
   try {
-    const res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
+    // ── PASS 1: Generate detailed notes ──
+    const notesRes = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        model:'claude-haiku-4-5-20251001',
-        max_tokens:1500,
-        system: sysPrompt,
-        messages: msgs
-      })
+        model:'claude-haiku-4-5-20251001', max_tokens:4000,
+        messages:[{ role:'user', content:[
+          fileBlock,
+          { type:'text', text:`You are an expert academic note-taker for an IIT Mandi BTech student.
+
+Read this document carefully and generate BEAUTIFULLY DETAILED NOTES in this exact format:
+
+# 📘 [Topic Title]
+
+## 🎯 Key Objectives
+- What this topic is about (2-3 bullet points)
+
+## 📖 Core Concepts
+
+### [Concept 1 Name]
+**Definition:** Clear, precise definition
+**Key Points:**
+- Point 1
+- Point 2
+**Formula/Rule:** (if applicable) \`formula here\`
+**Example:** Concrete example
+
+### [Concept 2 Name]
+[same structure]
+
+(cover ALL concepts in the document)
+
+## ⚡ Quick Summary
+3-5 sentence summary of the entire topic
+
+## 🔑 Key Formulas & Rules
+| Formula/Rule | What it means |
+|---|---|
+| ... | ... |
+
+## ❓ Important Questions to Know
+1. Question 1?
+2. Question 2?
+3. Question 3?
+
+## 💡 Tips & Tricks
+- Any mnemonics, shortcuts or exam tips
+
+Be thorough. Cover EVERY concept shown. Use clear headers and formatting.`
+          }
+        ]
+      }]
+    })
     });
-    const data = await res.json();
-    if(data.error) throw new Error(data.error.message);
-    const reply = data.content?.find(b=>b.type==='text')?.text || 'Sorry, I could not generate a response.';
-    tutorHistory.push({role:'assistant', content: reply});
-    removeTyping();
-    appendTutorMsg('ai', reply);
+    const notesData = await notesRes.json();
+    if(notesData.error) throw new Error(notesData.error.message);
+    lastNotesText = notesData.content?.find(b=>b.type==='text')?.text || '';
+    renderNotes(lastNotesText);
+
+    // ── PASS 2: Generate flowchart ──
+    setNotesStatus('Step 2/2 — Building flowchart…', '');
+    const flowRes = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:3000,
+        messages:[{ role:'user', content:[
+          fileBlock,
+          { type:'text', text:`Create a concept flowchart for this document as a raw SVG (no markdown, no backticks, just the SVG code starting with <svg).
+
+Requirements:
+- viewBox="0 0 900 600" (or taller if needed)
+- Dark background: rect fill="#0d1526"
+- Show the main topic at top, branching into subtopics, then details
+- Use rounded rectangles (rx="8") for nodes
+- Main topic: fill="#2563eb", white text, font-size="15"
+- Sub topics: fill="#1e2535", border stroke="#4f8ef7", text fill="#93c5fd", font-size="12"
+- Detail nodes: fill="#141f35", border stroke="#374151", text fill="#9ca3af", font-size="11"
+- Connector lines: stroke="#374151", stroke-width="1.5", marker arrows
+- Wrap long text with <tspan> elements
+- Cover ALL main concepts from the document
+- Make it visually clear and well-spaced
+
+Return ONLY the SVG code, nothing else.`
+          }
+        ]
+      }]
+    })
+    });
+    const flowData = await flowRes.json();
+    if(flowData.error) throw new Error(flowData.error.message);
+    lastFlowSVG = flowData.content?.find(b=>b.type==='text')?.text || '';
+    renderFlowchart(lastFlowSVG);
+    setNotesStatus('✓ Notes and flowchart ready!', 'ok');
+
   } catch(err) {
-    removeTyping();
-    appendTutorMsg('ai', `❌ Error: ${err.message}. Make sure your Cloudflare Worker is set up with ANTHROPIC_API_KEY.`);
+    setNotesStatus('❌ ' + err.message, 'err');
   } finally {
-    document.getElementById('tutor-send').disabled = false;
-    document.getElementById('tutor-input').focus();
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generate Notes &amp; Flowchart';
   }
+}
+
+function renderNotes(md) {
+  const el = document.getElementById('notes-content');
+  // Convert markdown to HTML
+  let html = md
+    .replace(/^# (.+)$/gm, '<h1 style="font-size:1.15rem;font-weight:800;color:var(--text);margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--accent)">$1</h1>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:.95rem;font-weight:700;color:var(--accent2);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em">$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:.88rem;font-weight:700;color:var(--text);margin:12px 0 6px">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--accent3)">$1</strong>')
+    .replace(/`(.+?)`/g, '<code style="background:rgba(37,99,235,.15);color:var(--accent3);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.8rem">$1</code>')
+    .replace(/^\| (.+) \|$/gm, (m,p) => {
+      const cells = p.split(' | ');
+      return `<tr>${cells.map(c=>`<td style="padding:5px 10px;border:1px solid var(--border);font-size:.78rem">${c}</td>`).join('')}</tr>`;
+    })
+    .replace(/(<tr>.*<\/tr>\n?)+/gs, m => `<table style="width:100%;border-collapse:collapse;margin:8px 0">${m}</table>`)
+    .replace(/^\|---.*$/gm, '')
+    .replace(/^- (.+)$/gm, '<li style="margin-bottom:3px;padding-left:4px">$1</li>')
+    .replace(/(<li.*<\/li>\n?)+/gs, m => `<ul style="margin:4px 0 8px 16px;padding:0">${m}</ul>`)
+    .replace(/^\d+\. (.+)$/gm, '<li style="margin-bottom:3px">$1</li>')
+    .replace(/\n\n/g, '<br>')
+    .replace(/\n/g, '<br>');
+  el.innerHTML = html;
+  document.getElementById('notes-output-card').style.display = 'block';
+  document.getElementById('notes-output-card').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function renderFlowchart(svgText) {
+  const clean = svgText.replace(/```svg|```/g,'').trim();
+  if(!clean.startsWith('<svg')) { return; }
+  document.getElementById('flow-content').innerHTML = clean;
+  document.getElementById('flow-output-card').style.display = 'block';
+  lastFlowSVG = clean;
+}
+
+function setNotesStatus(msg, type) {
+  const el = document.getElementById('notes-status');
+  el.innerHTML = msg;
+  el.style.color = type==='ok'?'var(--success)':type==='err'?'#f87171':'var(--muted)';
+}
+
+function copyNotes() {
+  navigator.clipboard.writeText(lastNotesText).then(()=>showToast('Notes copied!'));
+}
+
+function downloadNotes() {
+  if(!lastNotesText) return;
+  const fname = notesFile?.name?.replace(/\.[^.]+$/,'')||'notes';
+  const blob = new Blob([lastNotesText], {type:'text/markdown'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`${fname}_notes.md`; a.click();
+}
+
+function downloadFlowchart() {
+  if(!lastFlowSVG) return;
+  const fname = notesFile?.name?.replace(/\.[^.]+$/,'')||'flowchart';
+  const blob = new Blob([lastFlowSVG], {type:'image/svg+xml'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`${fname}_flowchart.svg`; a.click();
 }
 
 // ════════════════════════════════
