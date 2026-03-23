@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
 <meta charset="UTF-8">
@@ -48,7 +48,7 @@
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 
-<!-- Load saved theme immediately to prevent flash of unstyled content -->
+<!-- Load saved theme immediately -->
 <script>
 (function() {
   const savedAccent = localStorage.getItem('iit_accent');
@@ -71,15 +71,9 @@
     }
   }
   const savedFont = localStorage.getItem('iit_fontsize');
-  if(savedFont) {
-    const sizes = {small: '12px', medium: '13.5px', large: '15px'};
-    document.documentElement.style.setProperty('--base-font', sizes[savedFont]);
-  }
+  if(savedFont) document.documentElement.style.setProperty('--base-font', {small: '12px', medium: '13.5px', large: '15px'}[savedFont]);
   const savedRadius = localStorage.getItem('iit_borderradius');
-  if(savedRadius) {
-    const radius = {small: '4px', medium: '10px', large: '20px'};
-    document.documentElement.style.setProperty('--r', radius[savedRadius]);
-  }
+  if(savedRadius) document.documentElement.style.setProperty('--r', {small: '4px', medium: '10px', large: '20px'}[savedRadius]);
   const savedContrast = localStorage.getItem('iit_highcontrast');
   if(savedContrast === '1') {
     document.documentElement.style.setProperty('--border', 'rgba(255,255,255,0.3)');
@@ -87,24 +81,12 @@
   }
   const savedMode = localStorage.getItem('iit_mode');
   if(savedMode) {
-    const lightColors = {
-      bg: '#ffffff', s1: '#f8fafc', s2: '#f1f5f9', s3: '#e2e8f0',
-      text: '#1e293b', muted: '#64748b'
-    };
-    const darkColors = {
-      bg: '#070c18', s1: '#0d1526', s2: '#141f35', s3: '#1c2a47',
-      text: '#dde6f5', muted: '#5a7099'
-    };
-    if(savedMode === 'light') {
-      Object.keys(lightColors).forEach(key => {
-        document.documentElement.style.setProperty('--' + key, lightColors[key]);
-      });
-    } else if(savedMode === 'auto') {
-      const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-      const colors = prefersDark ? darkColors : lightColors;
-      Object.keys(colors).forEach(key => {
-        document.documentElement.style.setProperty('--' + key, colors[key]);
-      });
+    const lightColors = {bg: '#ffffff', s1: '#f8fafc', s2: '#f1f5f9', s3: '#e2e8f0', text: '#1e293b', muted: '#64748b'};
+    const darkColors = {bg: '#070c18', s1: '#0d1526', s2: '#141f35', s3: '#1c2a47', text: '#dde6f5', muted: '#5a7099'};
+    if(savedMode === 'light') Object.keys(lightColors).forEach(key => document.documentElement.style.setProperty('--' + key, lightColors[key]));
+    else if(savedMode === 'auto') {
+      const colors = window.matchMedia('(prefers-color-scheme: dark)').matches ? darkColors : lightColors;
+      Object.keys(colors).forEach(key => document.documentElement.style.setProperty('--' + key, colors[key]));
     }
   }
 })();
@@ -112,22 +94,12 @@
 
 <style>
 :root {
-  --bg: #070c18;
-  --s1: #0d1526;
-  --s2: #141f35;
-  --s3: #1c2a47;
-  --accent: #2563eb;
-  --accent2: #4f8ef7;
-  --accent3: #93c5fd;
-  --border: rgba(255,255,255,0.06);
-  --border2: rgba(255,255,255,0.1);
-  --text: #dde6f5;
-  --muted: #5a7099;
-  --success: #22c55e;
-  --warn: #f59e0b;
-  --danger: #ef4446;
-  --r: 10px;
-  --base-font: 13.5px;
+  --bg: #070c18; --s1: #0d1526; --s2: #141f35; --s3: #1c2a47;
+  --accent: #2563eb; --accent2: #4f8ef7; --accent3: #93c5fd;
+  --border: rgba(255,255,255,0.06); --border2: rgba(255,255,255,0.1);
+  --text: #dde6f5; --muted: #5a7099;
+  --success: #22c55e; --warn: #f59e0b; --danger: #ef4446;
+  --r: 10px; --base-font: 13.5px;
 }
 *{box-sizing:border-box;margin:0;padding:0}
 html,body{height:100%;overflow:hidden}
@@ -403,84 +375,6 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
 .att-c.active{background:#6366f1;color:#fff}
 .att-warning{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:8px 12px;font-size:.78rem;color:#f87171;margin-top:8px}
 .att-ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 12px;font-size:.78rem;color:#4ade80;margin-top:8px}
-
-/* ── ONBOARDING ── */
-#onboarding-overlay{
-  position:fixed;inset:0;z-index:9999;
-  background:var(--bg);
-  display:flex;align-items:center;justify-content:center;
-  overflow-y:auto;
-  animation:obFadeIn .4s ease;
-}
-@keyframes obFadeIn{from{opacity:0}to{opacity:1}}
-#onboarding-overlay.hide{animation:obFadeOut .35s ease forwards}
-@keyframes obFadeOut{from{opacity:1;transform:scale(1)}to{opacity:0;transform:scale(.97)}}
-
-.ob-card{
-  width:100%;max-width:520px;
-  background:var(--s1);
-  border:1px solid var(--border2);
-  border-radius:18px;
-  padding:36px 36px 28px;
-  margin:24px;
-  box-shadow:0 24px 80px rgba(0,0,0,.5);
-}
-.ob-logo{font-size:2.8rem;margin-bottom:8px}
-.ob-title{font-size:1.55rem;font-weight:800;letter-spacing:-.5px;margin-bottom:4px}
-.ob-sub{font-size:.82rem;color:var(--muted);margin-bottom:28px;line-height:1.5}
-
-/* step indicator */
-.ob-steps{display:flex;gap:6px;margin-bottom:28px}
-.ob-step{height:3px;flex:1;border-radius:2px;background:var(--s3);transition:background .3s}
-.ob-step.done{background:var(--accent)}
-.ob-step.active{background:var(--accent2)}
-
-/* step panels */
-.ob-panel{display:none}.ob-panel.active{display:block}
-.ob-section-label{font-size:.65rem;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent2);margin-bottom:14px;font-family:'JetBrains Mono',monospace}
-
-.ob-inp{
-  background:var(--s2);border:1.5px solid var(--border);border-radius:9px;
-  padding:10px 14px;color:var(--text);font-family:'Sora',sans-serif;
-  font-size:.88rem;outline:none;transition:border .15s;width:100%;
-}
-.ob-inp:focus{border-color:var(--accent)}
-.ob-sel{
-  background:var(--s2);border:1.5px solid var(--border);border-radius:9px;
-  padding:10px 14px;color:var(--text);font-family:'Sora',sans-serif;
-  font-size:.88rem;outline:none;cursor:pointer;width:100%;
-  -webkit-appearance:none;appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%235a7099' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 12px center;
-}
-.ob-fg{margin-bottom:14px}
-.ob-fg label{font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em}
-.ob-row2{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px}
-
-/* chip group */
-.ob-chip-group{display:flex;flex-wrap:wrap;gap:7px}
-.ob-chip{
-  padding:6px 14px;border-radius:20px;font-size:.78rem;font-weight:600;
-  cursor:pointer;border:1.5px solid var(--border);background:transparent;
-  color:var(--muted);transition:all .12s;font-family:'Sora',sans-serif;
-}
-.ob-chip.on{background:var(--accent);border-color:var(--accent);color:#fff}
-.ob-chip:hover:not(.on){color:var(--text);border-color:var(--border2)}
-
-/* nav buttons */
-.ob-nav{display:flex;gap:10px;justify-content:flex-end;margin-top:24px;padding-top:20px;border-top:1px solid var(--border)}
-.ob-btn{padding:9px 22px;border-radius:9px;border:none;font-family:'Sora',sans-serif;font-size:.85rem;font-weight:700;cursor:pointer;transition:all .15s}
-.ob-btn-p{background:var(--accent);color:#fff}.ob-btn-p:hover{background:#1d4ed8}
-.ob-btn-g{background:transparent;color:var(--muted);border:1.5px solid var(--border)}.ob-btn-g:hover{color:var(--text)}
-.ob-btn-big{padding:11px 28px;font-size:.9rem}
-
-/* preview card */
-.ob-preview{background:var(--s2);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-top:12px}
-.ob-preview-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:.8rem}
-.ob-preview-row:not(:last-child){border-bottom:1px solid var(--border)}
-.ob-preview-key{color:var(--muted);font-size:.72rem}
-.ob-preview-val{font-weight:600;color:var(--accent2);font-family:'JetBrains Mono',monospace;font-size:.78rem}
-
 </style>
 </head>
 <body>
@@ -490,13 +384,13 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
 <nav class="nav">
   <div class="brand">🎓 <span class="brand-code">IIT Mandi</span></div>
   <div class="tabs">
-    <button class="tab on">📋 Today</button>
-    <button class="tab" onclick="window.location.href='timetable.html'">🗓 Timetable</button>
-    <button class="tab" onclick="window.location.href='assignments.html'">📝 Assignments</button>
-    <button class="tab" onclick="window.location.href='exams.html'">🎯 Exams</button>
-    <button class="tab" onclick="window.location.href='attendance.html'">📊 Attendance</button>
-    <button class="tab" onclick="window.location.href='study.html'">📚 Study</button>
-    <button class="tab" onclick="window.location.href='settings.html'">⚙️ Settings</button>
+    <button class="tab " onclick="window.location.href='index.html'">📋 Today</button>
+    <button class="tab " onclick="window.location.href='timetable.html'">🗓 Timetable</button>
+    <button class="tab on" onclick="window.location.href='assignments.html'">📝 Assignments</button>
+    <button class="tab " onclick="window.location.href='exams.html'">🎯 Exams</button>
+    <button class="tab " onclick="window.location.href='attendance.html'">📊 Attendance</button>
+    <button class="tab " onclick="window.location.href='study.html'">📚 Study</button>
+    <button class="tab " onclick="window.location.href='settings.html'">⚙️ Settings</button>
   </div>
   <div class="nav-right">
     <strong id="nav-date"></strong>
@@ -507,364 +401,14 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
 </nav>
 
 <div class="scroll">
-
-<!-- ══ TODAY ══ -->
-<div class="page on" id="page-today">
-  <div class="h1" id="greet"></div>
-  <div class="muted small mb16" id="greet-sub"></div>
-  <div class="g2">
-    <div class="col" style="gap:12px">
-      <div class="card">
-        <div class="between mb12">
-          <div class="bold" style="font-size:.92rem">📚 Today's Classes</div>
-          <div id="day-badge" class="badge b-blue"></div>
-        </div>
-        <div class="today-classes-list" id="today-classes"></div>
-      </div>
-      <div class="card">
-        <div class="between mb12">
-          <div class="bold" style="font-size:.92rem">⏰ Upcoming Deadlines</div>
-          <button class="btn btn-p btn-sm" onclick="openModal('asgn')">+ Add</button>
-        </div>
-        <div id="today-dl"></div>
-      </div>
-    </div>
-    <div class="col" style="gap:12px">
-      <div class="card">
-        <div class="bold mb12" style="font-size:.92rem">📊 Semester Progress</div>
-        <div id="sem-prog"></div>
-      </div>
-      <div class="card">
-        <div class="bold mb12" style="font-size:.92rem">🎯 Next Exam</div>
-        <div id="next-exam"></div>
-      </div>
-      <div class="card">
-        <div class="bold mb8" style="font-size:.92rem">🔬 Today's Lab</div>
-        <div id="today-lab" class="small muted"></div>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- ══ TIMETABLE ══ -->
-<div class="page" id="page-tt">
-  <div class="between mb16">
-    <div class="bold" style="font-size:1.1rem">Weekly Timetable <span class="muted small" style="font-weight:400">Even Semester 2026</span></div>
-    <div class="row">
-      <span class="lbl" style="margin:0;margin-right:6px">Lab Group:</span>
-      <select class="sel" id="grp-sel" onchange="saveGrp()" style="padding:5px 10px;font-size:.78rem">
-        <option value="G1">G1</option><option value="G2">G2</option>
-        <option value="G3">G3</option><option value="G4">G4</option><option value="G5">G5</option>
-      </select>
-    </div>
-  </div>
-  <div class="tt-wrap mb20">
-    <div class="tt" id="tt-grid"></div>
-  </div>
-  <div class="bold mb12" style="font-size:.92rem">🔬 Lab Schedule (2:00–5:00 PM unless noted)</div>
-  <div style="overflow-x:auto;margin-bottom:20px">
-    <table class="lab-table" id="lab-tbl"></table>
-  </div>
-  <div class="bold mb8" style="font-size:.88rem">Course Legend</div>
-  <div class="legend" id="legend"></div>
-</div>
-
-<!-- ══ ASSIGNMENTS ══ -->
-<div class="page" id="page-asgn">
-  <div class="between mb16">
+<div class="page on" id="page-asgn">
+<div class="between mb16">
     <div class="bold" style="font-size:1.1rem">Assignments & Tasks</div>
     <button class="btn btn-p" onclick="openModal('asgn')">+ New Assignment</button>
   </div>
   <div class="filter-row" id="asgn-filters"></div>
   <div id="asgn-list"></div>
 </div>
-
-<!-- ══ EXAMS ══ -->
-<div class="page" id="page-exams">
-  <div class="between mb16">
-    <div class="bold" style="font-size:1.1rem">Exams & Quizzes</div>
-    <button class="btn btn-p" onclick="openModal('exam')">+ Add Exam / Quiz</button>
-  </div>
-  <div class="bold mb8 small muted" style="text-transform:uppercase;letter-spacing:.06em">Academic Calendar</div>
-  <div class="cal-strip" id="cal-strip"></div>
-  <div id="exam-upcoming"></div>
-  <div class="mt16 muted small bold mb8" style="text-transform:uppercase;letter-spacing:.06em">Past / Completed</div>
-  <div id="exam-past"></div>
-</div>
-
-<!-- ══ ATTENDANCE ══ -->
-<div class="page" id="page-attend">
-  <!-- Day-based Attendance Marking -->
-  <div class="card mb16">
-    <div class="between mb12">
-      <div class="bold" style="font-size:.95rem">📊 Mark Attendance by Day</div>
-      <div class="row" style="gap:6px">
-        <span class="lbl" style="margin:0">Select Day:</span>
-        <select class="sel" id="att-day-selector" onchange="renderDayCourses()" style="padding:6px 10px;font-size:.8rem">
-          <option value="Mon">Monday</option>
-          <option value="Tue">Tuesday</option>
-          <option value="Wed">Wednesday</option>
-          <option value="Thu">Thursday</option>
-          <option value="Fri">Friday</option>
-        </select>
-      </div>
-    </div>
-    <div id="day-courses-list"></div>
-    <div style="margin-top:12px;padding-top:12px;border-top:1px solid var(--border)">
-      <div class="between">
-        <div class="small muted">Total classes: <strong id="day-marked-count" style="color:var(--accent2)">0</strong></div>
-        <button class="btn btn-p btn-sm" onclick="saveDayAttendance()">💾 Save All</button>
-      </div>
-    </div>
-  </div>
-  <div class="between mb16">
-    <div>
-      <div class="bold" style="font-size:1.1rem">📊 Attendance Tracker</div>
-      <div class="small muted">IIT Mandi requires 80% attendance to sit for end-sem exams</div>
-    </div>
-    <div class="row" style="gap:8px">
-      <select class="sel" id="att-week-sel" onchange="renderAttendLog()" style="font-size:.78rem;padding:6px 10px"></select>
-      <button class="btn btn-p btn-sm" onclick="attMarkToday()">✏️ Mark Today</button>
-    </div>
-  </div>
-
-  <!-- Summary cards -->
-  <div id="att-summary" class="g3 mb16"></div>
-
-  <!-- Per-course cards -->
-  <div class="bold mb8" style="font-size:.92rem">Course-wise Breakdown</div>
-  <div id="att-courses"></div>
-
-  <!-- Log section -->
-  <div class="between mb8 mt16">
-    <div class="bold" style="font-size:.92rem">Attendance Log</div>
-    <div class="row" style="gap:6px">
-      <select class="sel" id="att-log-course" onchange="renderAttendLog()" style="font-size:.78rem;padding:6px 10px">
-        <option value="all">All Courses</option>
-      </select>
-    </div>
-  </div>
-  <div id="att-log"></div>
-</div>
-
-<!-- ══ STUDY ══ -->
-<div class="page" id="page-study">
-  <div class="g2" style="gap:16px;align-items:start">
-
-    <!-- LEFT: Pomodoro Timer -->
-    <div>
-      <div class="card mb12">
-        <div class="between mb16">
-          <div class="bold" style="font-size:.95rem">⏱ Focus Timer</div>
-          <div class="row" style="gap:6px">
-            <button class="chip on" id="pmode-focus" onclick="setPMode('focus',this)">Focus</button>
-            <button class="chip" id="pmode-short" onclick="setPMode('short',this)">Short Break</button>
-            <button class="chip" id="pmode-long" onclick="setPMode('long',this)">Long Break</button>
-          </div>
-        </div>
-
-        <!-- Ring timer display -->
-        <div style="display:flex;flex-direction:column;align-items:center;padding:16px 0">
-          <div style="position:relative;width:180px;height:180px;margin-bottom:16px">
-            <svg width="180" height="180" style="transform:rotate(-90deg)">
-              <circle cx="90" cy="90" r="80" fill="none" stroke="rgba(255,255,255,0.06)" stroke-width="10"/>
-              <circle id="pomo-ring" cx="90" cy="90" r="80" fill="none" stroke="var(--accent)" stroke-width="10"
-                stroke-dasharray="502.65" stroke-dashoffset="0" stroke-linecap="round"
-                style="transition:stroke-dashoffset 0.5s,stroke 0.3s"/>
-            </svg>
-            <div style="position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center">
-              <div id="pomo-time" style="font-size:2.4rem;font-weight:800;font-family:'JetBrains Mono',monospace">90:00</div>
-              <div id="pomo-label" class="small muted">Focus Session</div>
-            </div>
-          </div>
-
-          <!-- Controls -->
-          <div class="row" style="gap:10px;margin-bottom:16px">
-            <button id="pomo-btn" class="btn btn-p" onclick="togglePomo()" style="min-width:100px">▶ Start</button>
-            <button class="btn btn-g" onclick="resetPomo()">↺ Reset</button>
-          </div>
-
-          <!-- Session count -->
-          <div class="row" style="gap:6px">
-            <span class="small muted">Sessions today:</span>
-            <div class="row" style="gap:4px" id="pomo-dots"></div>
-            <span id="pomo-count" class="small bold mono" style="color:var(--accent2)">0</span>
-          </div>
-        </div>
-
-        <!-- Custom durations -->
-        <hr style="border:none;border-top:1px solid var(--border);margin:8px 0 12px">
-        <div class="small bold mb8" style="text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Custom Durations (min)</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:8px">
-          <div><label class="lbl">Focus</label><input class="inp" id="dur-focus" type="number" value="90" min="1" max="120" onchange="updateDurations()"></div>
-          <div><label class="lbl">Short Break</label><input class="inp" id="dur-short" type="number" value="5" min="1" max="30" onchange="updateDurations()"></div>
-          <div><label class="lbl">Long Break</label><input class="inp" id="dur-long" type="number" value="20" min="1" max="60" onchange="updateDurations()"></div>
-        </div>
-      </div>
-
-      <!-- Study stats -->
-      <div class="card">
-        <div class="bold mb12" style="font-size:.92rem">📈 Today's Study Stats</div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
-          <div class="card2" style="text-align:center">
-            <div style="font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:var(--accent2)" id="stat-focus-time">0h 0m</div>
-            <div class="small muted">Focus Time</div>
-          </div>
-          <div class="card2" style="text-align:center">
-            <div style="font-size:1.5rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:#4ade80" id="stat-sessions">0</div>
-            <div class="small muted">Sessions</div>
-          </div>
-        </div>
-        <div class="mt12">
-          <div class="small bold mb6" style="color:var(--muted);text-transform:uppercase;letter-spacing:.06em">Weekly Focus Time</div>
-          <div id="study-week-bars" style="display:flex;gap:6px;align-items:flex-end;height:50px"></div>
-          <div style="display:flex;gap:6px;margin-top:4px" id="study-week-labels"></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- RIGHT: Notes + Flowchart Generator -->
-    <div style="display:flex;flex-direction:column;gap:12px">
-
-      <!-- Upload card -->
-      <div class="card">
-        <div class="between mb4">
-          <div class="bold" style="font-size:.95rem">📄 Notes &amp; Flowchart Generator</div>
-          <span class="badge b-blue">Powered by Claude</span>
-        </div>
-        <div class="small muted mb12">Upload any lecture PDF, slides or photo — Claude will generate beautiful detailed notes and a visual flowchart.</div>
-
-        <!-- Drop zone -->
-        <div class="drop-zone" id="notes-dz" onclick="dzClick(event,'notes-file')" ondragover="dzDrag(event,'notes-dz')" ondragleave="dzLeave('notes-dz')" ondrop="notesDrop(event)">
-          <input type="file" id="notes-file" accept="image/*,.pdf" style="display:none" onchange="handleNotesFile(this)" onclick="event.stopPropagation()">
-          <div id="notes-dz-preview" class="dz-preview">
-            <div style="font-size:2rem">📚</div>
-            <div class="small" style="font-weight:600;margin-top:6px">Drop your PDF or image here</div>
-            <div class="small muted">Lecture notes, slides, textbook pages</div>
-          </div>
-        </div>
-
-        <div class="row mt12" style="gap:8px">
-          <button class="btn btn-p" id="notes-gen-btn" onclick="generateNotes()" style="flex:1" disabled>✨ Generate Notes &amp; Flowchart</button>
-          <button class="btn btn-g" onclick="clearNotesFile()">✕ Clear</button>
-        </div>
-        <div id="notes-status" class="small muted mt8"></div>
-      </div>
-
-      <!-- Output area -->
-      <div class="card" id="notes-output-card" style="display:none">
-        <div class="between mb12">
-          <div class="bold" style="font-size:.95rem">📋 Generated Notes</div>
-          <div class="row" style="gap:6px">
-            <button class="btn btn-g btn-sm" onclick="copyNotes()">📋 Copy</button>
-            <button class="btn btn-g btn-sm" onclick="downloadNotes()">â¬‡ Download</button>
-          </div>
-        </div>
-        <div id="notes-content" style="font-size:.82rem;line-height:1.8;color:var(--text)"></div>
-      </div>
-
-      <!-- Flowchart output -->
-      <div class="card" id="flow-output-card" style="display:none">
-        <div class="between mb12">
-          <div class="bold" style="font-size:.95rem">🔀 Concept Flowchart</div>
-          <button class="btn btn-g btn-sm" onclick="downloadFlowchart()">â¬‡ Download SVG</button>
-        </div>
-        <div id="flow-content" style="overflow-x:auto"></div>
-      </div>
-
-    </div>
-  </div>
-</div>
-
-<!-- ══ SETTINGS ══ -->
-<div class="page" id="page-settings">
-  <div class="between mb20">
-    <div class="bold" style="font-size:1.1rem">⚙️ Timetable &amp; Course Settings</div>
-    <div class="row">
-      <button class="btn btn-g btn-sm" onclick="resetCourses()">↺ Reset to Default</button>
-      <button class="btn btn-p btn-sm" onclick="openModal('course')">+ Add Course</button>
-    </div>
-  </div>
-
-  <!-- AI IMPORT CARD -->
-  
-  <!-- Worker / AI Settings Card -->
-  <div class="card mb16" id="worker-settings-card">
-    <div class="bold mb4" style="font-size:.92rem">🤖 AI Worker Settings</div>
-    <div class="small muted mb12">Cloudflare Worker proxy for Claude AI features (timetable import, notes generator).</div>
-    <div class="fg">
-      <label class="lbl">Worker Proxy URL</label>
-      <input class="inp" id="settings-proxy" placeholder="https://your-worker.workers.dev" oninput="saveWorkerSettings()">
-    </div>
-    <div class="fg">
-      <label class="lbl">Worker Secret</label>
-      <input class="inp" id="settings-secret" type="password" placeholder="your_secret_key" oninput="saveWorkerSettings()">
-    </div>
-    <div id="worker-save-status" class="small muted mt4"></div>
-  </div>
-
-  <div class="card mb16" id="import-card">
-    <div class="between mb4">
-      <div class="bold" style="font-size:.92rem">🤖 AI Import — Upload Timetable &amp; Calendar</div>
-      <span class="badge b-blue">Powered by Claude</span>
-    </div>
-    <div class="small muted mb14">Upload a photo of your timetable and/or academic calendar. Claude will read it and automatically populate your courses, slots, rooms, and key semester dates.</div>
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px">
-      <div class="drop-zone" id="dz-tt" onclick="dzClick(event,'upload-tt')" ondragover="dzDrag(event,'dz-tt')" ondragleave="dzLeave('dz-tt')" ondrop="dzDrop(event,'dz-tt','tt')">
-        <input type="file" id="upload-tt" accept="image/*,.pdf,.xlsx,.xls" style="display:none" onchange="handleUpload(this,'tt')" onclick="event.stopPropagation()">
-        <div id="dz-tt-preview" class="dz-preview">
-          <div style="font-size:1.5rem">📸</div>
-          <div class="small" style="font-weight:600;margin-top:6px">Timetable / Schedule</div>
-          <div class="small muted">Image, PDF or Excel</div>
-        </div>
-      </div>
-      <div class="drop-zone" id="dz-cal" onclick="dzClick(event,'upload-cal')" ondragover="dzDrag(event,'dz-cal')" ondragleave="dzLeave('dz-cal')" ondrop="dzDrop(event,'dz-cal','cal')">
-        <input type="file" id="upload-cal" accept="image/*,.pdf,.xlsx,.xls" style="display:none" onchange="handleUpload(this,'cal')" onclick="event.stopPropagation()">
-        <div id="dz-cal-preview" class="dz-preview">
-          <div style="font-size:1.5rem">📅</div>
-          <div class="small" style="font-weight:600;margin-top:6px">Academic Calendar</div>
-          <div class="small muted">Image, PDF or Excel</div>
-        </div>
-      </div>
-    </div>
-    <div class="row" style="gap:10px">
-      <button class="btn btn-p" id="parse-btn" onclick="runAIImport()" style="min-width:160px">✨ Parse &amp; Import</button>
-      <div id="parse-status" class="small muted"></div>
-    </div>
-    <div id="import-preview" style="display:none;margin-top:16px">
-      <hr style="border:none;border-top:1px solid var(--border);margin-bottom:14px">
-      <div class="bold mb8" style="font-size:.85rem">📋 Preview — Review before applying</div>
-      <div id="import-preview-content"></div>
-      <div class="row mt12" style="gap:8px">
-        <button class="btn btn-p" onclick="applyImport()">✅ Apply to Tracker</button>
-        <button class="btn btn-g" onclick="cancelImport()">✕ Discard</button>
-      </div>
-    </div>
-  </div>
-
-  <div class="card mb16">
-    <div class="bold mb4" style="font-size:.92rem">🗂 Slot → Course Mapping</div>
-    <div class="small muted mb12">Assign which course you attend in each time slot. Updates Today, Timetable &amp; Exams automatically.</div>
-    <div id="slot-editor"></div>
-  </div>
-
-  <div class="card mb16">
-    <div class="bold mb4" style="font-size:.92rem">🔬 Lab Group</div>
-    <div class="small muted mb12">Set your lab group — affects the lab highlight in Today and Timetable views.</div>
-    <div class="row">
-      <label class="lbl" style="margin:0;white-space:nowrap">My Lab Group:</label>
-      <select class="sel" id="settings-grp" onchange="saveGrpFromSettings()" style="width:120px">
-        <option value="G1">G1</option><option value="G2">G2</option>
-        <option value="G3">G3</option><option value="G4">G4</option><option value="G5">G5</option>
-      </select>
-      <span class="small muted">(Mon–Thu, 2:00–5:00 PM)</span>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="bold mb12" style="font-size:.92rem">📚 All Courses</div>
-    <div id="course-list-settings"></div>
-  </div>
 </div>
 </div><!-- app -->
 
@@ -1081,38 +625,6 @@ const CAL_EVENTS = [
   {date:'2026-05-02',name:'End Sem H',sub:'Slot H courses exam'},
 ];
 
-// Indian Holidays (recurring yearly)
-const HOLIDAYS = [
-  {date:'01-26',name:'🇮🇳 Republic Day'},
-  {date:'08-15',name:'🇮🇳 Independence Day'},
-  {date:'10-02',name:'🕊️ Gandhi Jayanti'},
-  {date:'01-14',name:'🌞 Makar Sankranti'},
-  {date:'01-23',name:'🎂 Netaji Jayanti'},
-  {date:'03-08',name:'🌸 Holi'},
-  {date:'04-14',name:'🎭 Ambedkar Jayanti'},
-  {date:'04-17',name:'🐍 Mahavir Jayanti'},
-  {date:'08-27',name:'🌙 Janmashtami'},
-  {date:'09-07',name:'🐘 Ganesh Chaturthi'},
-  {date:'10-06',name:'🌾 Dussehra'},
-  {date:'10-20',name:'🪔 Diwali'},
-  {date:'11-05',name:'🌕 Karva Chauth'},
-  {date:'11-14',name:'🎆 Dhanteras'},
-  {date:'12-25',name:'🎄 Christmas'},
-  {date:'03-17',name:'☘️ St. Patrick Day'},
-  {date:'05-01',name:'👷 Labour Day'},
-  {date:'04-01',name:'🌿 Ugadi'},
-  {date:'04-14',name:'🌾 Baisakhi'},
-  {date:'09-05',name:'👨‍🏫 Teachers Day'},
-  {date:'11-14',name:'👶 Childrens Day'},
-  {date:'01-12',name:'📖 National Youth Day'},
-  {date:'02-14',name:'💝 Valentines Day'},
-  {date:'06-21',name:'🧘 International Yoga Day'},
-  {date:'09-08',name:'📚 Literacy Day'},
-  {date:'10-31',name:'🕯️ Unity Day'},
-  {date:'11-17',name:'🌍 Students Day'},
-  {date:'12-06',name:'🎖️ Armed Forces Day'},
-];
-
 // Pre-seeded exams (end sem)
 const SEED_EXAMS = [
   {id:'es3',courseCode:'IC-253',title:'End Sem — DSA / PDS',type:'endsem',date:'2026-04-25',score:'',notes:'Slot A',done:false},
@@ -1189,21 +701,9 @@ function greetMsg() {
   return 'Good Evening 🌙';
 }
 
-function getTodayHoliday() {
-  const todayStr = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
-  return HOLIDAYS.find(h => h.date === todayStr);
-}
-
-function isWeekend() {
-  const day = now.getDay();
-  return day === 0 || day === 6;
-}
-
 // ════════════════════════════════
 //  NAV
 // ════════════════════════════════
-// Note: Navigation now uses separate HTML files (timetable.html, assignments.html, etc.)
-// The go() function is kept for backwards compatibility but not used
 function go(id,btn) {
   document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
   document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
@@ -1222,43 +722,11 @@ function go(id,btn) {
 // ════════════════════════════════
 function renderToday() {
   document.getElementById('nav-date').textContent = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
-  
-  // Get user name from profile
-  const profile = (function(){ try{ return JSON.parse(localStorage.getItem('iit_profile')); } catch(e){ return null; } })();
-  const userName = profile?.name ? profile.name.split(' ')[0] : '';
-  
-  // Update nav bar with user name
-  const navUserName = document.getElementById('nav-user-name');
-  if(navUserName) {
-    navUserName.textContent = userName ? '👤 ' + userName : '';
-  }
-  
-  // Check for holiday
-  const holiday = getTodayHoliday();
-  
-  // Update nav bar holiday indicator (only show if holiday)
-  const navHoliday = document.getElementById('nav-holiday');
-  if(navHoliday) {
-    if(holiday) {
-      navHoliday.innerHTML = `<span class="badge b-yellow">🎉 ${holiday.name}</span>`;
-    } else {
-      navHoliday.innerHTML = '';
-    }
-  }
-  
-  // Update greeting with user name and holiday status
-  const greet = greetMsg();
-  let greetText = userName ? `${greet}, ${userName}!` : greet;
-  
-  if(holiday) {
-    greetText += ` <span class="badge b-yellow" style="margin-left:10px;font-size:.7rem">🎉 ${holiday.name}</span>`;
-  }
-  
-  document.getElementById('greet').innerHTML = greetText;
+  document.getElementById('greet').textContent = greetMsg();
 
   const dayKey = DAYS_ARR[now.getDay()]; // 'Mon','Tue'...
   document.getElementById('day-badge').textContent = dayKey;
-  document.getElementById('greet-sub').textContent = `${now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · ${profile?.sem ? profile.sem + ' Semester ' + (profile.acyear||'2025-26') : 'Even Semester 2026'}`;
+  document.getElementById('greet-sub').textContent = `${now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · Even Semester 2026`;
 
   // Today's classes
   const slots = SLOTS_PER_DAY[dayKey] || [];
@@ -2003,10 +1471,6 @@ Return ONLY this JSON (no markdown, no backticks, no explanation):
   "calendarEvents": [
     { "date":"2026-01-05", "name":"Classes Begin", "sub":"Even Semester 2026 starts" }
   ],
-  "holidays": [
-    { "date":"01-26", "name":"Republic Day" },
-    { "date":"08-15", "name":"Independence Day" }
-  ],
   "semesterInfo": { "name":"Even Semester 2026", "startDate":"2026-01-05", "endDate":"2026-05-02" },
   "labSchedule": [
     { "courseCode":"IC-161P", "Mon":"G1", "Tue":"G2", "Wed":"G3", "Thu":"G4", "Fri":"—", "time":"2:00–5:00 PM" }
@@ -2019,9 +1483,6 @@ RULES:
 - Skip only courses with slot "NS" or "UNCLEAR"
 - Dates must be YYYY-MM-DD
 - If multiple courses have the same slot letter, include ALL of them
-- **IMPORTANT**: From the academic calendar, extract ALL holidays and festivals (like Holi, Diwali, Dussehra, Eid, Christmas, etc.) and add them to the "holidays" array with format MM-DD
-- Look for holidays in the calendar section - they may be marked as "Holiday", "Break", "Festival", or with specific names
-- Include both national holidays and institute-specific holidays from the calendar
 - Return ONLY the raw JSON object
       `}
     ];
@@ -2091,19 +1552,6 @@ function showImportPreview(parsed) {
     }
   }
 
-  if(parsed.holidays?.length) {
-    html += `<div class="bold small mb6 mt12" style="text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">🎉 Holidays (${parsed.holidays.length})</div>`;
-    parsed.holidays.slice(0,10).forEach(h => {
-      html += `<div class="import-event-row">
-        <span class="mono small" style="color:#fbbf24;min-width:50px">${h.date}</span>
-        <span style="font-weight:600;color:#fbbf24">${h.name}</span>
-      </div>`;
-    });
-    if(parsed.holidays.length > 10) {
-      html += `<div class="small muted" style="padding:4px 10px">…and ${parsed.holidays.length - 10} more holidays</div>`;
-    }
-  }
-
   document.getElementById('import-preview-content').innerHTML = html;
   document.getElementById('import-preview').style.display = 'block';
   document.getElementById('import-preview').scrollIntoView({behavior:'smooth', block:'nearest'});
@@ -2135,22 +1583,6 @@ function applyImport() {
     // Also inject into live CAL_EVENTS array
     CAL_EVENTS.length = 0;
     merged.forEach(e => CAL_EVENTS.push(e));
-  }
-
-  // Apply holidays extracted from calendar — merge with existing
-  if(p.holidays?.length) {
-    const existingHolidays = load('iit_holidays') || [];
-    const mergedHolidays = [...existingHolidays];
-    p.holidays.forEach(h => {
-      if(!mergedHolidays.find(e=>e.date===h.date)) mergedHolidays.push(h);
-    });
-    save('iit_holidays', mergedHolidays);
-    // Also update the live HOLIDAYS array
-    mergedHolidays.forEach(h => {
-      if(!HOLIDAYS.find(x=>x.date===h.date)) {
-        HOLIDAYS.push({date:h.date, name:'🎉 '+h.name});
-      }
-    });
   }
 
   // Apply semester info
@@ -2926,30 +2358,1892 @@ function downloadFlowchart() {
     LAB_SCHED.length=0;
     savedLab.forEach(l=>LAB_SCHED.push([l.courseCode,{Mon:l.Mon||'—',Tue:l.Tue||'—',Wed:l.Wed||'—',Thu:l.Thu||'—',Fri:l.Fri||'—'},l.time||'2:00–5:00 PM']));
   }
-  // Load saved holidays from previous AI imports
-  const savedHolidays = load('iit_holidays');
-  if(savedHolidays?.length) {
-    savedHolidays.forEach(h => {
-      if(!HOLIDAYS.find(x=>x.date===h.date)) {
-        HOLIDAYS.push({date:h.date, name:'🎉 '+h.name});
-      }
-    });
-  }
-  // Load and apply saved theme settings
-  applySavedTheme();
   // Check for conflicts on startup
   detectAndResolveConflicts(() => { renderToday(); });
+})();
+
+renderToday();
+</script>
+
+<!-- Toast -->
+<div class="save-toast" id="toast"></div>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner" style="display:none;position:fixed;bottom:20px;right:20px;background:#1e2535;border:1px solid rgba(37,99,235,.4);border-radius:12px;padding:14px 16px;z-index:300;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+  <div style="font-size:.85rem;font-weight:700;margin-bottom:4px">📲 Install as App</div>
+  <div style="font-size:.72rem;color:#5a7099;margin-bottom:10px">Add to home screen or desktop for quick access</div>
+  <div style="display:flex;gap:6px">
+    <button onclick="installPWA()" style="flex:1;background:#2563eb;color:#fff;border:none;border-radius:7px;padding:7px;font-size:.78rem;font-weight:600;cursor:pointer">Install</button>
+    <button onclick="document.getElementById('pwa-banner').style.display='none'" style="background:transparent;color:#5a7099;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;font-size:.78rem;cursor:pointer">Later</button>
+  </div>
+</div>
+
+<script>
+// ════════════════════════════════
+//  CORE UTILS (must be first)
+// ════════════════════════════════
+const load = k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } };
+const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+// Cloudflare Worker proxy URL — update this after deploying your worker
+const PROXY_URL = load('iit_proxy_url') || 'https://iit-tracker.krish210005.workers.dev';
+
+// Cloudflare Worker secret — update this to match your worker's environment variable
+const WORKER_SECRET = load('iit_worker_secret') || 'iitmandi_krish_2026';
+
+// ════════════════════════════════
+//  DATA
+// ════════════════════════════════
+const DEFAULT_COURSES = [
+  {code:'IC-253',name:'Programming & Data Structures',short:'DSA / PDS',slot:'A',color:'#4ade80',credits:3,room:'A18-1'},
+  {code:'IC-252',name:'Probability & Statistics',short:'Prob & Stats',slot:'B',color:'#60a5fa',credits:4,room:'Auditorium'},
+  {code:'IC-113',name:'Complex & Vector Calculus',short:'Complex Calculus',slot:'C',color:'#818cf8',credits:2,room:'Auditorium'},
+  {code:'IC-161',name:'Applied Electronics',short:'Electronics',slot:'D',color:'#38bdf8',credits:3,room:'Auditorium'},
+  {code:'IC-115',name:'ODE & Integral Transform',short:'ODE & IT',slot:'E',color:'#34d399',credits:2,room:'Auditorium'},
+  {code:'IC-102P',name:'Foundations of Design Practice',short:'Design Practice',slot:'F',color:'#fbbf24',credits:4,room:'Auditorium'},
+  {code:'IC-140',name:'Graphics for Design',short:'Graphics',slot:'G',color:'#f87171',credits:4,room:'Auditorium'},
+  {code:'CE-202',name:'Introduction to Civil Engineering',short:'Civil Engg',slot:'H',color:'#84cc16',credits:1,room:'A11-1B'},
+  {code:'IC-161P',name:'Applied Electronics Lab',short:'Electronics Lab',slot:'LAB',color:'#0ea5e9',credits:2,room:'—'},
+  {code:'IC-222P',name:'Physics Practicum',short:'Physics Lab',slot:'LAB',color:'#94a3b8',credits:2,room:'—'},
+];
+
+const COURSES = load('iit_courses') || DEFAULT_COURSES.map(c=>({...c}));
+
+// Slot → time on each day
+// Mon/Wed/Fri: 9=A, 10=D, 11=B, 12=F  Tue: 9=D, 10=C, 11=E, 12=G  Thu: 9=H, 10=C, 11=E, 12=G
+const SLOTS_PER_DAY = {
+  Mon:[{t:'9:00–9:50',s:'A'},{t:'10:00–10:50',s:'D'},{t:'11:00–11:50',s:'B'},{t:'12:00–12:50',s:'F'},{t:'1:00–2:00',s:'LUNCH'}],
+  Tue:[{t:'9:00–9:50',s:'D'},{t:'10:00–10:50',s:'C'},{t:'11:00–11:50',s:'E'},{t:'12:00–12:50',s:'G'},{t:'1:00–2:00',s:'LUNCH'}],
+  Wed:[{t:'9:00–9:50',s:'A'},{t:'10:00–10:50',s:'D'},{t:'11:00–11:50',s:'B'},{t:'12:00–12:50',s:'F'},{t:'1:00–2:00',s:'LUNCH'}],
+  Thu:[{t:'9:00–9:50',s:'H'},{t:'10:00–10:50',s:'C'},{t:'11:00–11:50',s:'E'},{t:'12:00–12:50',s:'G'},{t:'1:00–2:00',s:'LUNCH'}],
+  Fri:[{t:'9:00–9:50',s:'A'},{t:'10:00–10:50',s:'D'},{t:'11:00–11:50',s:'B'},{t:'12:00–12:50',s:'F'},{t:'1:00–2:00',s:'LUNCH'}],
+};
+// Lab schedule [code, day→group, time note]
+// Each entry: [courseCode, {Mon,Tue,Wed,Thu,Fri}, timeNote]
+const LAB_SCHED = [
+  ['IC-161P', {Mon:'G1',Tue:'G2',Wed:'G3',Thu:'G4',Fri:'—'}, '2:00–5:00 PM'],
+  ['IC-252',  {Mon:'G2',Tue:'G3/G5',Wed:'G4',Thu:'G1',Fri:'—'}, '2:00–5:00 PM'],
+  ['IC-222P', {Mon:'H1',Tue:'H2',Wed:'H3',Thu:'H4',Fri:'—'}, '2:00–5:00 PM'],
+  ['IC-102P', {Mon:'G3',Tue:'G4',Wed:'G1',Thu:'G2',Fri:'—'}, '5:00–6:00 PM'],
+  ['IC-140',  {Mon:'—',Tue:'—',Wed:'—',Thu:'—',Fri:'G1–G4'}, '2:00–5:00 PM'],
+];
+
+// Academic calendar key dates
+const CAL_EVENTS = [
+  {date:'2026-01-05',name:'Classes Begin',sub:'Even Sem 2026 starts'},
+  {date:'2026-01-16',name:'Add/Drop Ends',sub:'Last date to add/drop courses'},
+  {date:'2026-02-25',name:'Mid Sem A & B',sub:'Slots A, B exams'},
+  {date:'2026-02-26',name:'Mid Sem C & D',sub:'Slots C, D exams'},
+  {date:'2026-02-27',name:'Mid Sem E & F',sub:'Slots E, F exams'},
+  {date:'2026-02-28',name:'Mid Sem G & H',sub:'Slots G, H exams'},
+  {date:'2026-03-01',name:'Mid Break Begins',sub:'Mar 1–8'},
+  {date:'2026-03-09',name:'Classes Resume',sub:'Post mid break'},
+  {date:'2026-03-12',name:'Midsem Sheets',sub:'Last date to see midsem papers'},
+  {date:'2026-04-24',name:'Last Day of Teaching',sub:'Even Semester ends'},
+  {date:'2026-04-25',name:'End Sem A',sub:'Slot A courses exam'},
+  {date:'2026-04-26',name:'End Sem B',sub:'Slot B courses exam'},
+  {date:'2026-04-27',name:'End Sem C',sub:'Slot C courses exam'},
+  {date:'2026-04-28',name:'End Sem D',sub:'Slot D courses exam'},
+  {date:'2026-04-29',name:'End Sem E',sub:'Slot E courses exam'},
+  {date:'2026-04-30',name:'End Sem F',sub:'Slot F courses exam'},
+  {date:'2026-05-01',name:'End Sem G',sub:'Slot G courses exam'},
+  {date:'2026-05-02',name:'End Sem H',sub:'Slot H courses exam'},
+];
+
+// Pre-seeded exams (end sem)
+const SEED_EXAMS = [
+  {id:'es3',courseCode:'IC-253',title:'End Sem — DSA / PDS',type:'endsem',date:'2026-04-25',score:'',notes:'Slot A',done:false},
+  {id:'es5',courseCode:'IC-252',title:'End Sem — Prob & Stats',type:'endsem',date:'2026-04-26',score:'',notes:'Slot B',done:false},
+  {id:'es6',courseCode:'IC-113',title:'End Sem — Complex Calculus',type:'endsem',date:'2026-04-27',score:'',notes:'Slot C',done:false},
+  {id:'es7',courseCode:'IC-161',title:'End Sem — Applied Electronics',type:'endsem',date:'2026-04-28',score:'',notes:'Slot D',done:false},
+  {id:'es8',courseCode:'IC-115',title:'End Sem — ODE & IT',type:'endsem',date:'2026-04-29',score:'',notes:'Slot E',done:false},
+  {id:'es9',courseCode:'IC-102P',title:'End Sem — Design Practice',type:'endsem',date:'2026-04-30',score:'',notes:'Slot F',done:false},
+  {id:'es10',courseCode:'IC-140',title:'End Sem — Graphics',type:'endsem',date:'2026-05-01',score:'',notes:'Slot G',done:false},
+  {id:'es11',courseCode:'CE-202',title:'End Sem — Civil Engg',type:'endsem',date:'2026-05-02',score:'',notes:'Slot H',done:false},
+  // Mid sems (past)
+  {id:'ms2',courseCode:'IC-253',title:'Mid Sem — DSA / PDS',type:'midsem',date:'2026-02-25',score:'',notes:'Slot A',done:true},
+  {id:'ms3',courseCode:'IC-252',title:'Mid Sem — Prob & Stats',type:'midsem',date:'2026-02-25',score:'',notes:'Slot B',done:true},
+  {id:'ms4',courseCode:'IC-113',title:'Mid Sem — Complex Calculus',type:'midsem',date:'2026-02-26',score:'',notes:'Slot C',done:true},
+  {id:'ms5',courseCode:'IC-161',title:'Mid Sem — Applied Electronics',type:'midsem',date:'2026-02-26',score:'',notes:'Slot D',done:true},
+  {id:'ms6',courseCode:'IC-115',title:'Mid Sem — ODE & IT',type:'midsem',date:'2026-02-27',score:'',notes:'Slot E',done:true},
+  {id:'ms7',courseCode:'IC-102P',title:'Mid Sem — Design Practice',type:'midsem',date:'2026-02-27',score:'',notes:'Slot F',done:true},
+  {id:'ms8',courseCode:'IC-140',title:'Mid Sem — Graphics',type:'midsem',date:'2026-02-28',score:'',notes:'Slot G',done:true},
+  {id:'ms9',courseCode:'CE-202',title:'Mid Sem — Civil Engg',type:'midsem',date:'2026-02-28',score:'',notes:'Slot H',done:true},
+];
+
+const SEED_ASGNS = [
+  {id:'a1',courseCode:'IC-253',title:'DSA Assignment — Skip List Leaderboard + DLL Messaging',type:'Assignment',due:'2026-03-28',priority:'H',notes:'Skip list (randomLevel, createNode, insertPlayer) + DLL messaging system in C',done:false},
+  {id:'a2',courseCode:'IC-161P',title:'Lab Report — BJT I-V Characteristics',type:'Lab Report',due:'2026-03-24',priority:'M',notes:'BC547B, CE config; characteristic curves embedded in Word doc',done:false},
+  {id:'a3',courseCode:'IC-161P',title:'Lab Report — CE Amplifier Design',type:'Lab Report',due:'2026-03-31',priority:'M',notes:'BC547 CE amplifier; voltage gain, Rin, Rout analysis',done:false},
+];
+
+const DEFAULT_HABITS = [
+  {id:'h1',name:'🌅 Wake by 7 AM'},
+  {id:'h2',name:'📗 Study 2+ hrs'},
+  {id:'h3',name:'🏃 Exercise'},
+  {id:'h4',name:'💧 Drink water'},
+  {id:'h5',name:'📵 No phone after 11 PM'},
+  {id:'h6',name:'✅ Review notes'},
+];
+
+// ════════════════════════════════
+//  STATE
+// ════════════════════════════════
+let asgns   = load('iit_asgns')   || [...SEED_ASGNS];
+let exams   = load('iit_exams')   || [...SEED_EXAMS];
+let habits  = load('iit_habits')  || [...DEFAULT_HABITS];
+let hchecks = load('iit_hchecks') || {};
+let labGrp  = load('iit_grp')     || 'G1';
+let asgnFilter = 'all';
+let conflictData = {};
+
+// ════════════════════════════════
+//  HELPERS
+// ════════════════════════════════
+const now   = new Date();
+const TODAY = dk(now);
+const DAYS_ARR = ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'];
+const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+const MONTH_FULL = ['January','February','March','April','May','June','July','August','September','October','November','December'];
+
+function dk(d) {
+  return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+}
+function dateObj(s) { const p=s.split('-'); return new Date(+p[0],+p[1]-1,+p[2]); }
+function daysLeft(s) {
+  const diff = dateObj(s) - new Date(now.getFullYear(),now.getMonth(),now.getDate());
+  return Math.round(diff/(1000*60*60*24));
+}
+function fmtDate(s) {
+  const d=dateObj(s); return `${d.getDate()} ${MONTHS[d.getMonth()]}`;
+}
+function course(code) { return COURSES.find(c=>c.code===code)||{code,name:code,color:'#64748b',short:code}; }
+function uid() { return Date.now().toString(36)+Math.random().toString(36).slice(2); }
+function greetMsg() {
+  const h=now.getHours();
+  if(h<12) return 'Good Morning ☀️';
+  if(h<17) return 'Good Afternoon 🌤';
+  return 'Good Evening 🌙';
+}
+
+// ════════════════════════════════
+//  NAV
+// ════════════════════════════════
+function go(id,btn) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('on'));
+  document.querySelectorAll('.tab').forEach(t=>t.classList.remove('on'));
+  document.getElementById('page-'+id).classList.add('on');
+  btn.classList.add('on');
+  if(id==='tt') renderTT();
+  if(id==='exams') renderExams();
+  if(id==='asgn') renderAsgns();
+  if(id==='settings') renderSettings();
+  if(id==='attend') renderAttend();
+  if(id==='study') initPomoDisplay();
+}
+
+// ════════════════════════════════
+//  TODAY
+// ════════════════════════════════
+function renderToday() {
+  document.getElementById('nav-date').textContent = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
+  document.getElementById('greet').textContent = greetMsg();
+
+  const dayKey = DAYS_ARR[now.getDay()]; // 'Mon','Tue'...
+  document.getElementById('day-badge').textContent = dayKey;
+  document.getElementById('greet-sub').textContent = `${now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'long',year:'numeric'})} · Even Semester 2026`;
+
+  // Today's classes
+  const slots = SLOTS_PER_DAY[dayKey] || [];
+  let classHtml = '';
+  if(!slots.length) { classHtml = '<div class="muted small">No classes today 🎉</div>'; }
+  slots.forEach(({t,s}) => {
+    if(s==='LUNCH') { classHtml += `<div class="ci"><div class="ci-time">${t}</div><div class="ci-dot" style="background:#374151"></div><div><div class="ci-name" style="color:var(--muted);font-size:.8rem">Lunch Break</div></div></div>`; return; }
+    const codes = getSlotCodes()[s]||[];
+    codes.forEach(code => {
+      const c = course(code);
+      classHtml += `<div class="ci">
+        <div class="ci-time mono">${t}</div>
+        <div class="ci-dot" style="background:${c.color}"></div>
+        <div><div class="ci-name">${c.short}</div><div class="ci-sub">${c.code} · ${c.room}</div></div>
+      </div>`;
+    });
+  });
+  document.getElementById('today-classes').innerHTML = classHtml || '<div class="muted small">No classes today 🎉</div>';
+
+  // Upcoming deadlines (next 10 days, not done)
+  const upcoming = [...asgns]
+    .filter(a=>!a.done && a.due)
+    .map(a=>({...a,dl:daysLeft(a.due)}))
+    .filter(a=>a.dl>=0)
+    .sort((a,b)=>a.dl-b.dl)
+    .slice(0,5);
+  let dlHtml = '';
+  upcoming.forEach(a => {
+    const c = course(a.courseCode);
+    const cls = a.dl===0?'d-urg':a.dl<=3?'d-urg':a.dl<=7?'d-soon':'d-ok';
+    const label = a.dl===0?'TODAY':a.dl===1?'Tomorrow':`${a.dl}d left`;
+    dlHtml += `<div class="dl-item">
+      <div class="dl-dot" style="background:${c.color}"></div>
+      <div class="dl-title">${a.title}</div>
+      <div class="dl-due">${fmtDate(a.due)}</div>
+      <div class="ddays ${cls}">${label}</div>
+    </div>`;
+  });
+  document.getElementById('today-dl').innerHTML = dlHtml || '<div class="muted small">No upcoming deadlines 🎉 Add one above.</div>';
+
+  // Semester progress
+  const semStart = dateObj('2026-01-05');
+  const semEnd   = dateObj('2026-05-02');
+  const elapsed  = Math.max(0, now - semStart);
+  const total    = semEnd - semStart;
+  const pct      = Math.min(100, Math.round(elapsed/total*100));
+  const weeksLeft = Math.max(0, Math.ceil((semEnd - now)/(1000*60*60*24*7)));
+  document.getElementById('sem-prog').innerHTML = `
+    <div class="small muted mb8">Even Semester 2026</div>
+    <div class="sem-bar-wrap"><div class="sem-bar-fill" style="width:${pct}%"></div></div>
+    <div class="between mt8">
+      <div class="small muted">Jan 5</div>
+      <div class="small bold" style="color:var(--accent2)">${pct}% complete</div>
+      <div class="small muted">May 2</div>
+    </div>
+    <div class="row mt12" style="gap:16px">
+      <div><div class="small muted">Weeks left</div><div class="bold mono" style="font-size:1.2rem;color:var(--accent2)">${weeksLeft}</div></div>
+      <div><div class="small muted">End Sem starts</div><div class="bold" style="color:var(--warn)">Apr 25</div></div>
+    </div>`;
+
+  // Next exam
+  const nextEx = exams.filter(e=>!e.done && e.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date))[0];
+  if(nextEx) {
+    const c=course(nextEx.courseCode); const dl=daysLeft(nextEx.date);
+    document.getElementById('next-exam').innerHTML = `
+      <div class="row mb8">
+        <div class="ci-dot" style="background:${c.color};width:10px;height:10px"></div>
+        <div class="bold">${nextEx.title}</div>
+      </div>
+      <div class="small muted mb8 mono">${c.code} · ${fmtDate(nextEx.date)}</div>
+      <div class="badge type-${nextEx.type}" style="margin-bottom:8px">${nextEx.type}</div>
+      <div style="font-size:1.4rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${dl<=7?'#f87171':dl<=14?'#fbbf24':'var(--accent2)'}">${dl} days away</div>`;
+  } else {
+    document.getElementById('next-exam').innerHTML = '<div class="muted small">No upcoming exams recorded</div>';
+  }
+
+  // Today's lab
+  const labs = LAB_SCHED.filter(([,sched])=>sched[dayKey] && sched[dayKey]!=='—');
+  if(!labs.length) {
+    document.getElementById('today-lab').innerHTML = 'No lab today';
+  } else {
+    document.getElementById('today-lab').innerHTML = labs.map(([code,sched,time])=>{
+      const c=course(code);
+      const grpForDay=sched[dayKey];
+      const isMyGrp=grpForDay===labGrp||grpForDay.includes(labGrp.replace('G',''));
+      return `<div class="row" style="margin-bottom:5px">
+        <div class="ci-dot" style="background:${c.color};width:8px;height:8px"></div>
+        <span class="bold" style="color:${c.color}">${c.short}</span>
+        <span class="muted">${time} · Group: ${grpForDay}</span>
+        ${isMyGrp?'<span class="badge b-green">YOUR GROUP</span>':''}
+      </div>`;
+    }).join('');
+  }
+}
+
+// ════════════════════════════════
+//  TIMETABLE
+// ════════════════════════════════
+function renderTT() {
+  document.getElementById('grp-sel').value = labGrp;
+  const days = ['Mon','Tue','Wed','Thu','Fri'];
+  const times = ['9:00–9:50','10:00–10:50','11:00–11:50','12:00–12:50','1:00–2:00'];
+  const slotMap = getSlotCodes();
+
+  // Build a 2D: rows=times, cols=days
+  let html = `<div class="tt-hdr"></div>`;
+  days.forEach(d=>{ html+=`<div class="tt-hdr">${d}</div>`; });
+
+  times.forEach((t,ti) => {
+    html += `<div class="tt-time mono">${t}</div>`;
+    days.forEach(d => {
+      const slotInfo = SLOTS_PER_DAY[d][ti];
+      if(!slotInfo) { html+='<div class="tt-empty"></div>'; return; }
+      const {s} = slotInfo;
+      if(s==='LUNCH') { html+='<div class="tt-lunch">Lunch Break 🍽</div>'; return; }
+      const codes = slotMap[s]||[];
+      if(!codes.length) { html+='<div class="tt-empty"></div>'; return; }
+      if(codes.length===1) {
+        const c=course(codes[0]);
+        html+=`<div class="tt-course" style="background:${c.color}18;border-color:${c.color}30">
+          <span class="slot">Slot ${s}</span>
+          <span class="cname">${c.short}</span>
+          <span class="ccode">${c.code}</span>
+          <span class="croom">📍 ${c.room}</span>
+        </div>`;
+      } else {
+        html+=`<div class="tt-course multi" style="background:var(--s2);border-color:var(--border2)">
+          <span class="slot">Slot ${s} (multiple)</span>
+          ${codes.map(code=>{ const c=course(code); return `<div style="display:flex;align-items:center;gap:4px;margin-bottom:2px"><div style="width:6px;height:6px;border-radius:50%;background:${c.color};flex-shrink:0"></div><span class="cname" style="font-size:.65rem">${c.short}</span></div>`; }).join('')}
+        </div>`;
+      }
+    });
+  });
+  document.getElementById('tt-grid').innerHTML = html;
+
+  // Lab table
+  let labHtml = `<thead><tr><th>Course</th><th>Time</th><th>Mon</th><th>Tue</th><th>Wed</th><th>Thu</th><th>Fri</th></tr></thead><tbody>`;
+  LAB_SCHED.forEach(([code,sched,time])=>{
+    const c=course(code);
+    labHtml+=`<tr>
+      <td><span style="color:${c.color};font-weight:700">${c.code}</span><br><span style="color:var(--muted);font-size:.65rem;font-family:sans-serif">${c.short}</span></td>
+      <td>${time}</td>
+      ${['Mon','Tue','Wed','Thu','Fri'].map(d=>{
+        const g=sched[d]||'—'; const isEmpty=g==='—';
+        const isMine=!isEmpty&&(g===labGrp||g.includes(labGrp)||g.includes(labGrp.replace('G','')));
+        return `<td class="${isEmpty?'none':''} ${isMine?'mine':''}">${g}</td>`;
+      }).join('')}
+    </tr>`;
+  });
+  labHtml+='</tbody>';
+  document.getElementById('lab-tbl').innerHTML = labHtml;
+
+  // Legend
+  document.getElementById('legend').innerHTML = COURSES.map(c=>`
+    <div class="legend-item">
+      <div class="legend-dot" style="background:${c.color}"></div>
+      <span class="mono" style="color:${c.color};font-size:.65rem">${c.code}</span>
+      <span class="muted" style="font-size:.68rem">${c.short}</span>
+    </div>`).join('');
+}
+
+function saveGrp() {
+  labGrp = document.getElementById('grp-sel').value;
+  save('iit_grp',labGrp);
+  renderTT();
+}
+
+// ════════════════════════════════
+//  ASSIGNMENTS
+// ════════════════════════════════
+function renderAsgns() {
+  // Build filter chips
+  let filters = `<button class="chip ${asgnFilter==='all'?'on':''}" onclick="setFilter('all')">All</button>
+    <button class="chip ${asgnFilter==='pending'?'on':''}" onclick="setFilter('pending')">Pending</button>
+    <button class="chip ${asgnFilter==='done'?'on':''}" onclick="setFilter('done')">Done</button>`;
+  COURSES.forEach(c=>{
+    filters+=`<button class="chip ${asgnFilter===c.code?'on':''}" onclick="setFilter('${c.code}')" style="${asgnFilter===c.code?'':''}border-color:${c.color}30;color:${asgnFilter===c.code?'#fff':c.color}">${c.code}</button>`;
+  });
+  document.getElementById('asgn-filters').innerHTML = filters;
+
+  let filtered = [...asgns];
+  if(asgnFilter==='pending') filtered=filtered.filter(a=>!a.done);
+  else if(asgnFilter==='done') filtered=filtered.filter(a=>a.done);
+  else if(asgnFilter!=='all') filtered=filtered.filter(a=>a.courseCode===asgnFilter);
+  filtered.sort((a,b)=>{
+    if(a.done!==b.done) return a.done?1:-1;
+    if(!a.due) return 1; if(!b.due) return -1;
+    return a.due.localeCompare(b.due);
+  });
+
+  const priMap={'H':'🔴 High','M':'🟡 Medium','L':'🟢 Low'};
+  const priClass={'H':'p-H','M':'p-M','L':'p-L'};
+  let html = '';
+  if(!filtered.length) { html='<div class="muted small" style="padding:20px 0">No assignments found. Add one!</div>'; }
+  filtered.forEach(a=>{
+    const c=course(a.courseCode);
+    const dl=a.due?daysLeft(a.due):null;
+    const dlLabel = dl===null?'':`${dl<0?`${Math.abs(dl)}d overdue`:dl===0?'Today':dl===1?'Tomorrow':`${dl}d left`}`;
+    const dlCls = dl===null?'':`${dl<0?'d-urg':dl===0?'d-urg':dl<=3?'d-urg':dl<=7?'d-soon':'d-ok'}`;
+    html+=`<div class="asgn-item ${a.done?'done':''}">
+      <div class="pbar ${priClass[a.priority]||'p-M'}"></div>
+      <div class="chk ${a.done?'on':''}" onclick="toggleAsgn('${a.id}')"></div>
+      <div class="asgn-main">
+        <div class="asgn-title ${a.done?'s':''}">${a.title}</div>
+        <div class="asgn-meta">
+          <span class="course-tag" style="background:${c.color}20;color:${c.color}">${c.code}</span>
+          <span class="badge b-gray">${a.type}</span>
+          ${a.due?`<span class="dl-due">📅 ${fmtDate(a.due)}</span>`:''}
+          ${dlLabel?`<span class="ddays ${dlCls}">${dlLabel}</span>`:''}
+          <span class="small muted">${priMap[a.priority]||''}</span>
+        </div>
+        ${a.notes?`<div class="asgn-note">${a.notes}</div>`:''}
+      </div>
+      <div class="asgn-acts">
+        <button class="ibtn del" onclick="delAsgn('${a.id}')" title="Delete">🗑</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('asgn-list').innerHTML = html;
+}
+
+function setFilter(f) { asgnFilter=f; renderAsgns(); }
+function toggleAsgn(id) {
+  const a=asgns.find(x=>x.id===id); if(!a) return;
+  a.done=!a.done; save('iit_asgns',asgns); renderAsgns();
+}
+function delAsgn(id) {
+  if(!confirm('Delete this assignment?')) return;
+  asgns=asgns.filter(a=>a.id!==id); save('iit_asgns',asgns); renderAsgns();
+}
+
+// ════════════════════════════════
+//  EXAMS
+// ════════════════════════════════
+function renderExams() {
+  // Cal strip
+  let strip='';
+  CAL_EVENTS.forEach(ev=>{
+    const d=dateObj(ev.date); const dl=daysLeft(ev.date);
+    const past=dl<0; const near=dl>=0&&dl<=14; const tod=ev.date===TODAY;
+    strip+=`<div class="cal-ev ${past?'past':''} ${near&&!past?'near':''} ${tod?'today-ev':''}">
+      <div class="cal-ev-date mono">${fmtDate(ev.date)}</div>
+      <div class="cal-ev-name">${ev.name}</div>
+      <div class="cal-ev-sub muted">${ev.sub}</div>
+    </div>`;
+  });
+  document.getElementById('cal-strip').innerHTML = strip;
+
+  const upcoming = exams.filter(e=>!e.done && e.date>=TODAY).sort((a,b)=>a.date.localeCompare(b.date));
+  const past     = exams.filter(e=>e.done || e.date<TODAY).sort((a,b)=>b.date.localeCompare(a.date));
+
+  document.getElementById('exam-upcoming').innerHTML = examList(upcoming,false) || '<div class="muted small">No upcoming exams</div>';
+  document.getElementById('exam-past').innerHTML     = examList(past,true)    || '<div class="muted small">No past exams</div>';
+}
+
+function examList(list,isPast) {
+  return list.map(e=>{
+    const c=course(e.courseCode); const d=dateObj(e.date); const dl=daysLeft(e.date);
+    const dlStr=isPast||e.done?'':`${dl}d away`;
+    const dlCol=dl<=7?'#f87171':dl<=14?'#fbbf24':'var(--accent2)';
+    return `<div class="exam-card ${isPast||e.done?'past-card':''}">
+      <div class="edate-box">
+        <div class="edate-d">${d.getDate()}</div>
+        <div class="edate-m">${MONTHS[d.getMonth()]}</div>
+      </div>
+      <div class="einfo">
+        <div class="e-title">${e.title}</div>
+        <div class="e-course">${c.code}${e.notes?` · ${e.notes}`:''}</div>
+        <div style="margin-top:5px"><span class="badge type-${e.type}">${e.type}</span></div>
+      </div>
+      <div class="e-right">
+        ${dlStr?`<div class="e-countdown" style="color:${dlCol}">${dlStr}</div>`:''}
+        ${e.score?`<div class="e-score muted">${e.score}</div>`:''}
+        <div style="margin-top:6px;display:flex;gap:4px;justify-content:flex-end">
+          ${!e.done?`<button class="btn btn-g btn-sm" onclick="markExamDone('${e.id}')">✓ Done</button>`:'<span class="badge b-green">Done</span>'}
+          <button class="ibtn del" onclick="delExam('${e.id}')">🗑</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function markExamDone(id) {
+  const e=exams.find(x=>x.id===id); if(!e) return;
+  const sc=prompt('Enter score (e.g. 18/20) or leave blank:','');
+  e.done=true; if(sc!==null) e.score=sc;
+  save('iit_exams',exams); renderExams();
+}
+function delExam(id) {
+  if(!confirm('Delete this exam?')) return;
+  exams=exams.filter(e=>e.id!==id); save('iit_exams',exams); renderExams();
+}
+
+// ════════════════════════════════
+//  MODALS
+// ════════════════════════════════
+function closeModal(type) { document.getElementById('modal-'+type).classList.remove('on'); }
+
+function saveAsgn(){
+  const title=document.getElementById('a-title').value.trim();
+  if(!title) { alert('Please enter a title'); return; }
+  asgns.push({
+    id:uid(), courseCode:document.getElementById('a-course').value,
+    title, type:document.getElementById('a-type').value,
+    due:document.getElementById('a-due').value||null,
+    priority:document.getElementById('a-pri').value,
+    notes:document.getElementById('a-notes').value.trim(),
+    done:false
+  });
+  save('iit_asgns',asgns); closeModal('asgn');
+  // if on asgn page re-render
+  if(document.getElementById('page-asgn').classList.contains('on')) renderAsgns();
+  renderToday();
+}
+
+function saveExam(){
+  const title=document.getElementById('e-title').value.trim();
+  if(!title) { alert('Please enter a title'); return; }
+  const date=document.getElementById('e-date').value;
+  if(!date) { alert('Please select a date'); return; }
+  exams.push({
+    id:uid(), courseCode:document.getElementById('e-course').value,
+    title, type:document.getElementById('e-type').value, date,
+    score:document.getElementById('e-score').value.trim(),
+    notes:document.getElementById('e-notes').value.trim(), done:false
+  });
+  save('iit_exams',exams); closeModal('exam');
+  if(document.getElementById('page-exams').classList.contains('on')) renderExams();
+}
+
+// ════════════════════════════════
+//  SETTINGS
+// ════════════════════════════════
+const SLOT_TIMES = {
+  A: 'Mon/Wed/Fri · 9:00–9:50 AM',
+  B: 'Mon/Wed/Fri · 11:00–11:50 AM',
+  C: 'Tue/Thu · 10:00–10:50 AM',
+  D: 'Mon/Wed/Fri · 10:00–10:50 AM',
+  E: 'Tue/Thu · 11:00–11:50 AM',
+  F: 'Mon/Wed/Fri · 12:00–12:50 PM',
+  G: 'Tue/Thu · 12:00–12:50 PM',
+  H: 'Thu · 9:00–9:50 AM',
+  LAB: 'Mon–Thu · 2:00–5:00 PM',
+};
+
+const PALETTE = ['#4ade80','#60a5fa','#818cf8','#f87171','#fbbf24','#38bdf8','#34d399','#a78bfa','#f472b6','#fb923c','#84cc16','#0ea5e9','#94a3b8','#e879f9','#2dd4bf'];
+let pickedColor = PALETTE[0];
+
+function getSlotCodes() {
+  // Build slot→codes map dynamically from COURSES
+  const map = {};
+  COURSES.forEach(c => {
+    if(!map[c.slot]) map[c.slot]=[];
+    map[c.slot].push(c.code);
+  });
+  return map;
+}
+
+function renderSettings() {
+  document.getElementById('settings-grp').value = labGrp;
+  const slotMap = getSlotCodes();
+  const slots = ['A','B','C','D','E','F','G','H'];
+  let html = `<div class="slot-row" style="padding-bottom:6px;border-bottom:2px solid var(--border2)">
+    <div class="small muted bold">SLOT</div>
+    <div class="small muted bold">SCHEDULE</div>
+    <div class="small muted bold">COURSE ASSIGNED</div>
+    <div></div>
+  </div>`;
+  slots.forEach(s => {
+    const assigned = (slotMap[s]||[]);
+    const courseOpts = ['<option value="">(none)</option>',
+      ...COURSES.filter(c=>c.slot!=='LAB').map(c=>`<option value="${c.code}" ${assigned.includes(c.code)?'selected':''}>${c.code} — ${c.short}</option>`)
+    ].join('');
+    // Show current assigned with color dot
+    const assignedDisplay = assigned.length
+      ? assigned.map(code=>{ const c=course(code); return `<span style="display:inline-flex;align-items:center;gap:4px"><span style="width:7px;height:7px;border-radius:50%;background:${c.color};display:inline-block"></span><span style="font-size:.72rem;font-family:'JetBrains Mono',monospace;color:${c.color}">${c.code}</span></span>`; }).join(', ')
+      : '<span class="muted small">—</span>';
+    html += `<div class="slot-row">
+      <div class="slot-badge">Slot ${s}</div>
+      <div class="slot-time">${SLOT_TIMES[s]}</div>
+      <div>
+        <select class="sel" style="width:100%;font-size:.78rem;padding:6px 10px" onchange="assignSlot('${s}',this.value)">
+          ${courseOpts}
+        </select>
+      </div>
+      <div style="font-size:.65rem;min-width:80px">${assignedDisplay}</div>
+    </div>`;
+  });
+  document.getElementById('slot-editor').innerHTML = html;
+
+  // Course list
+  let chtml = '';
+  COURSES.forEach(c => {
+    chtml += `<div class="course-row-s">
+      <div style="width:12px;height:12px;border-radius:3px;background:${c.color};flex-shrink:0"></div>
+      <div class="mono" style="color:${c.color};font-size:.78rem;min-width:70px">${c.code}</div>
+      <div style="flex:1;font-size:.82rem;font-weight:600">${c.short}</div>
+      <div class="small muted mono" style="min-width:50px">Slot ${c.slot}</div>
+      <div class="small muted" style="min-width:60px">📍 ${c.room}</div>
+      <div class="row" style="gap:4px">
+        <button class="btn btn-g btn-sm" onclick="editCourse('${c.code}')">✏️</button>
+        <button class="ibtn del" onclick="delCourse('${c.code}')">🗑</button>
+      </div>
+    </div>`;
+  });
+  document.getElementById('course-list-settings').innerHTML = chtml || '<div class="muted small">No courses. Add one above.</div>';
+}
+
+function assignSlot(slot, courseCode) {
+  // Remove this slot from any existing course that had it (single-course-per-slot rule)
+  COURSES.forEach(c => { if(c.slot===slot) c.slot=''; });
+  if(courseCode) {
+    const c = COURSES.find(x=>x.code===courseCode);
+    if(c) c.slot = slot;
+  }
+  save('iit_courses', COURSES);
+  renderSettings();
+  showToast('Slot updated ✓');
+}
+
+function delCourse(code) {
+  if(!confirm(`Remove ${code} from your course list?`)) return;
+  const idx = COURSES.findIndex(c=>c.code===code);
+  if(idx>-1) COURSES.splice(idx,1);
+  save('iit_courses', COURSES);
+  renderSettings();
+  showToast('Course removed');
+}
+
+function editCourse(code) {
+  const c = COURSES.find(x=>x.code===code); if(!c) return;
+  document.getElementById('course-modal-title').textContent = '✏️ Edit Course';
+  document.getElementById('c-edit-id').value = code;
+  document.getElementById('c-code').value = c.code;
+  document.getElementById('c-short').value = c.short;
+  document.getElementById('c-name').value = c.name;
+  document.getElementById('c-slot').value = c.slot;
+  document.getElementById('c-room').value = c.room;
+  document.getElementById('c-credits').value = c.credits||3;
+  pickedColor = c.color;
+  buildColorPicker();
+  document.getElementById('modal-course').classList.add('on');
+}
+
+function saveCourse() {
+  const code = document.getElementById('c-code').value.trim().toUpperCase();
+  const short = document.getElementById('c-short').value.trim();
+  const name = document.getElementById('c-name').value.trim();
+  if(!code||!short) { alert('Code and short name are required'); return; }
+  const editId = document.getElementById('c-edit-id').value;
+  const obj = {
+    code, short, name: name||short,
+    slot: document.getElementById('c-slot').value,
+    room: document.getElementById('c-room').value.trim()||'—',
+    credits: parseInt(document.getElementById('c-credits').value)||3,
+    color: pickedColor,
+  };
+  if(editId) {
+    const idx = COURSES.findIndex(c=>c.code===editId);
+    if(idx>-1) COURSES[idx]=obj; else COURSES.push(obj);
+  } else {
+    if(COURSES.find(c=>c.code===code)) { alert(`${code} already exists. Edit it instead.`); return; }
+    COURSES.push(obj);
+  }
+  save('iit_courses', COURSES);
+  closeModal('course');
+  renderSettings();
+  showToast('Course saved ✓');
+}
+
+function buildColorPicker() {
+  document.getElementById('color-picker').innerHTML = PALETTE.map(col =>
+    `<div class="color-swatch ${col===pickedColor?'sel-c':''}" style="background:${col}" onclick="pickColor('${col}')"></div>`
+  ).join('');
+}
+
+function pickColor(col) {
+  pickedColor = col;
+  buildColorPicker();
+}
+
+function saveGrpFromSettings() {
+  labGrp = document.getElementById('settings-grp').value;
+  save('iit_grp', labGrp);
+  showToast('Lab group saved ✓');
+}
+
+function resetCourses() {
+  if(!confirm('Reset courses to defaults? Your assignments and exams are kept.')) return;
+  COURSES.length = 0;
+  DEFAULT_COURSES.forEach(c => COURSES.push({...c}));
+  save('iit_courses', COURSES);
+  renderSettings();
+  showToast('Reset to defaults ✓');
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('on');
+  setTimeout(()=>t.classList.remove('on'), 2000);
+}
+
+// ════════════════════════════════
+//  MODALS (updated to handle 'course')
+// ════════════════════════════════
+function openModal(type) {
+  const opts = COURSES.map(c=>`<option value="${c.code}">${c.code} — ${c.short}</option>`).join('');
+  if(type==='asgn') {
+    document.getElementById('a-course').innerHTML=opts;
+    document.getElementById('a-due').value='';
+    document.getElementById('a-title').value='';
+    document.getElementById('a-notes').value='';
+    document.getElementById('a-pri').value='M';
+    document.getElementById('modal-asgn').classList.add('on');
+    setTimeout(()=>document.getElementById('a-title').focus(),100);
+  } else if(type==='exam') {
+    document.getElementById('e-course').innerHTML=opts;
+    document.getElementById('e-title').value='';
+    document.getElementById('e-date').value='';
+    document.getElementById('e-score').value='';
+    document.getElementById('e-notes').value='';
+    document.getElementById('modal-exam').classList.add('on');
+    setTimeout(()=>document.getElementById('e-title').focus(),100);
+  } else if(type==='course') {
+    document.getElementById('course-modal-title').textContent = '➕ Add Course';
+    document.getElementById('c-edit-id').value = '';
+    document.getElementById('c-code').value='';
+    document.getElementById('c-short').value='';
+    document.getElementById('c-name').value='';
+    document.getElementById('c-slot').value='A';
+    document.getElementById('c-room').value='';
+    document.getElementById('c-credits').value='3';
+    pickedColor = PALETTE[Math.floor(Math.random()*PALETTE.length)];
+    buildColorPicker();
+    document.getElementById('modal-course').classList.add('on');
+    setTimeout(()=>document.getElementById('c-code').focus(),100);
+  }
+}
+
+// Close modal on overlay click
+document.querySelectorAll('.overlay').forEach(o=>{
+  o.addEventListener('click',e=>{ if(e.target===o) o.classList.remove('on'); });
+});
+
+// ════════════════════════════════
+//  AI IMPORT
+// ════════════════════════════════
+let uploadedFiles = { tt: null, cal: null };
+let pendingImport = null;
+
+// Fix: prevent event bubbling on drop zone click
+function dzClick(e, inputId) {
+  if(e.target.tagName === 'INPUT') return;
+  document.getElementById(inputId).click();
+}
+
+function dzDrag(e, id) { e.preventDefault(); document.getElementById(id).classList.add('drag-over'); }
+function dzLeave(id) { document.getElementById(id).classList.remove('drag-over'); }
+function dzDrop(e, id, type) {
+  e.preventDefault(); dzLeave(id);
+  const file = e.dataTransfer.files[0];
+  if(file) loadFile(file, type);
+}
+function handleUpload(input, type) {
+  const file = input.files[0];
+  if(file) loadFile(file, type);
+}
+
+function getFileIcon(name) {
+  if(/\.xlsx?$/i.test(name)) return '📊';
+  if(/\.pdf$/i.test(name)) return '📄';
+  return '🖼️';
+}
+
+function loadFile(file, type) {
+  const dzId    = type==='tt' ? 'dz-tt'         : 'dz-cal';
+  const prevId  = type==='tt' ? 'dz-tt-preview'  : 'dz-cal-preview';
+  const dz      = document.getElementById(dzId);
+  dz.classList.remove('drag-over');
+  dz.classList.add('has-file');
+  document.getElementById('parse-status').textContent = '';
+  document.getElementById('import-preview').style.display = 'none';
+
+  const isImage = file.type.startsWith('image/');
+  const isPDF   = file.type === 'application/pdf' || /\.pdf$/i.test(file.name);
+  const isExcel = /\.xlsx?$/i.test(file.name) || file.type.includes('spreadsheet') || file.type.includes('excel');
+
+  if(isExcel) {
+    // Use SheetJS to convert Excel → plain text for Claude
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      try {
+        const wb = XLSX.read(e.target.result, {type:'array'});
+        let text = '';
+        wb.SheetNames.forEach(name => {
+          text += `\n--- Sheet: ${name} ---\n`;
+          text += XLSX.utils.sheet_to_csv(wb.Sheets[name]);
+        });
+        uploadedFiles[type] = { kind:'text', text, name: file.name };
+        document.getElementById(prevId).innerHTML =
+          `<div style="font-size:1.5rem">📊</div><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div><div class="small muted">Excel parsed ✓</div>`;
+      } catch(err) {
+        setParseStatus('❌ Could not read Excel file: ' + err.message, 'err');
+        dz.classList.remove('has-file');
+      }
+    };
+    reader.readAsArrayBuffer(file);
+
+  } else if(isPDF) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64  = dataUrl.split(',')[1];
+      uploadedFiles[type] = { kind:'pdf', base64, mediaType:'application/pdf', name: file.name };
+      document.getElementById(prevId).innerHTML =
+        `<div style="font-size:1.5rem">📄</div><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div>`;
+    };
+    reader.readAsDataURL(file);
+
+  } else if(isImage) {
+    const reader = new FileReader();
+    reader.onload = (e) => {
+      const dataUrl = e.target.result;
+      const base64  = dataUrl.split(',')[1];
+      uploadedFiles[type] = { kind:'image', base64, mediaType: file.type||'image/jpeg', name: file.name };
+      document.getElementById(prevId).innerHTML =
+        `<img src="${dataUrl}" class="dz-thumb"><div class="small" style="font-weight:600;color:var(--success)">✓ ${file.name}</div>`;
+    };
+    reader.readAsDataURL(file);
+
+  } else {
+    setParseStatus('⚠️ Unsupported file type. Use image, PDF or Excel.', 'warn');
+    dz.classList.remove('has-file');
+  }
+}
+
+function buildContentBlock(f, label) {
+  if(!f) return [];
+  const blocks = [];
+  if(f.kind === 'image') {
+    blocks.push({ type:'image', source:{ type:'base64', media_type: f.mediaType, data: f.base64 }});
+    blocks.push({ type:'text', text: `The image above is a ${label}.` });
+  } else if(f.kind === 'pdf') {
+    blocks.push({ type:'document', source:{ type:'base64', media_type:'application/pdf', data: f.base64 }});
+    blocks.push({ type:'text', text: `The document above is a ${label}.` });
+  } else if(f.kind === 'text') {
+    blocks.push({ type:'text', text: `The following CSV/text data is from an Excel file and represents a ${label}:\n${f.text}` });
+  }
+  return blocks;
+}
+
+async function runAIImport() {
+  if(!uploadedFiles.tt && !uploadedFiles.cal) {
+    setParseStatus('⚠️ Please upload at least one file first.', 'warn'); return;
+  }
+  const btn = document.getElementById('parse-btn');
+  btn.innerHTML = '<span class="parse-spinner"></span>Parsing…';
+  btn.disabled = true;
+  setParseStatus('Claude is reading your files…', '');
+
+  try {
+    // ── PASS 1: Extract raw text row by row ──
+    setParseStatus('Pass 1/2 — Reading every row…', '');
+    const pass1Content = [
+      ...buildContentBlock(uploadedFiles.tt,  'TIMETABLE / COURSE SCHEDULE'),
+      ...buildContentBlock(uploadedFiles.cal, 'ACADEMIC CALENDAR'),
+      { type:'text', text:`
+Look at this timetable/calendar image very carefully.
+
+TASK: List EVERY single row you can see in the course/timetable table. Do not skip any row.
+
+For the timetable, output each row like this (one per line):
+ROW: <Sr.No> | <Course Code> | <Course Name> | <Credits> | <Slot> | <Room> | <Campus>
+
+For the lab schedule table, output each row like this:
+LAB: <Course Code> | Mon=<group> | Tue=<group> | Wed=<group> | Thu=<group> | Fri=<group> | Time=<time>
+
+For calendar events, output each event like this:
+CAL: <date as DD/MM/YYYY> | <event name> | <details>
+
+Rules:
+- Read EVERY row, even if text is small or partially cut off
+- For slot column: if it says "B + Lab slot" write "B+LAB", if just "Lab slot" write "LAB", if "NS" write "NS"
+- Do NOT skip rows, do NOT summarize — list each row individually
+- If you cannot read something clearly, write UNCLEAR for that field
+      `}
+    ];
+
+    const pass1Res = await fetch(PROXY_URL, {
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:4000, messages:[{role:'user', content:pass1Content}] })
+    });
+    const pass1Data = await pass1Res.json();
+    if(pass1Data.error) throw new Error(pass1Data.error.message);
+    const rawRows = pass1Data.content?.find(b=>b.type==='text')?.text || '';
+    if(!rawRows.trim()) throw new Error('Could not read the image. Try a clearer photo.');
+
+    // ── PASS 2: Convert raw rows → structured JSON ──
+    setParseStatus('Pass 2/2 — Structuring data…', '');
+
+    const pass2Content = [
+      { type:'text', text:`
+You extracted the following raw data from an IIT Mandi timetable/calendar image:
+
+${rawRows}
+
+Now convert this into structured JSON. Use the IIT Mandi slot system:
+- Slot A = Mon/Wed/Fri 9:00–9:50 AM
+- Slot B = Mon/Wed/Fri 11:00–11:50 AM
+- Slot C = Tue/Thu 10:00–10:50 AM
+- Slot D = Mon/Wed/Fri 10:00–10:50 AM
+- Slot E = Tue/Thu 11:00–11:50 AM
+- Slot F = Mon/Wed/Fri 12:00–12:50 PM
+- Slot G = Tue/Thu 12:00–12:50 PM
+- Slot H = Thu 9:00–9:50 AM
+- B+LAB = slot is "B" (lab handled separately)
+- F+LAB = slot is "F"
+- G+LAB = slot is "G"
+- LAB = slot is "LAB"
+- NS = no slot, skip this course
+
+KNOWN COURSES at IIT Mandi (Even Sem 2026) — if you see any of these in the raw rows, ALWAYS include them:
+- IC-115 = "Ode and Integral Transform" (also written as "ODE & Integral Transform") → Slot E
+- IC-113 = "Complex and Vector Calculus" → Slot C
+- IC-253 = "Programming and Data Structures" → Slot A
+- IC-252 = "Probability and Statistics" → Slot B (also has Lab)
+- IC-161 = "Applied Electronics" → Slot D
+- IC-102P = "Foundations of Design Practice" → Slot F (also has Lab)
+- IC-140 = "Graphics for Design" → Slot G (also has Lab)
+- CE-202 = "Introduction to Civil Engineering" → Slot H
+- IC-161P = "Applied Electronics Lab" → LAB
+- IC-222P = "Physics Practicum" → LAB
+- IC-010 = "Internship" → skip (NS slot)
+
+Assign each course a different color from: #4ade80, #60a5fa, #f87171, #fbbf24, #818cf8, #38bdf8, #34d399, #a78bfa, #f472b6, #fb923c, #84cc16, #0ea5e9, #e879f9, #2dd4bf, #94a3b8
+
+Return ONLY this JSON (no markdown, no backticks, no explanation):
+{
+  "courses": [
+    { "code":"IC-253", "name":"Programming and Data Structures", "short":"DSA", "slot":"A", "room":"A18-1", "credits":3, "color":"#4ade80" }
+  ],
+  "calendarEvents": [
+    { "date":"2026-01-05", "name":"Classes Begin", "sub":"Even Semester 2026 starts" }
+  ],
+  "semesterInfo": { "name":"Even Semester 2026", "startDate":"2026-01-05", "endDate":"2026-05-02" },
+  "labSchedule": [
+    { "courseCode":"IC-161P", "Mon":"G1", "Tue":"G2", "Wed":"G3", "Thu":"G4", "Fri":"—", "time":"2:00–5:00 PM" }
+  ]
+}
+
+RULES:
+- Include ALL courses from the ROW: lines — do not drop any
+- "Ode" or "ODE" at the start of a course name = IC-115, Slot E — NEVER skip this
+- Skip only courses with slot "NS" or "UNCLEAR"
+- Dates must be YYYY-MM-DD
+- If multiple courses have the same slot letter, include ALL of them
+- Return ONLY the raw JSON object
+      `}
+    ];
+
+    const pass2Res = await fetch(PROXY_URL, {
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
+      body: JSON.stringify({ model:'claude-haiku-4-5-20251001', max_tokens:6000, messages:[{role:'user', content:pass2Content}] })
+    });
+    const pass2Data = await pass2Res.json();
+    if(pass2Data.error) throw new Error(pass2Data.error.message);
+
+    const rawText = pass2Data.content?.find(b=>b.type==='text')?.text || '';
+    const jsonMatch = rawText.match(/\{[\s\S]*\}/);
+    if(!jsonMatch) throw new Error('Could not structure the data. Try again.');
+    const parsed = JSON.parse(jsonMatch[0]);
+    pendingImport = parsed;
+    showImportPreview(parsed);
+    setParseStatus(`✓ Found ${parsed.courses?.length||0} courses, ${parsed.calendarEvents?.length||0} calendar events. Review below.`, 'ok');
+
+  } catch(err) {
+    setParseStatus('❌ ' + err.message, 'err');
+    console.error(err);
+  } finally {
+    btn.innerHTML = '✨ Parse &amp; Import';
+    btn.disabled = false;
+  }
+}
+
+function setParseStatus(msg, type) {
+  const el = document.getElementById('parse-status');
+  el.innerHTML = msg;
+  el.style.color = type==='ok' ? 'var(--success)' : type==='warn' ? '#fbbf24' : type==='err' ? '#f87171' : 'var(--muted)';
+}
+
+function showImportPreview(parsed) {
+  let html = '';
+
+  if(parsed.semesterInfo?.name) {
+    html += `<div class="mb8"><span class="badge b-blue">${parsed.semesterInfo.name}</span>
+      <span class="small muted" style="margin-left:8px">${parsed.semesterInfo.startDate} → ${parsed.semesterInfo.endDate}</span></div>`;
+  }
+
+  if(parsed.courses?.length) {
+    html += `<div class="bold small mb6" style="text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Courses (${parsed.courses.length})</div>`;
+    parsed.courses.forEach(c => {
+      html += `<div class="import-course-row">
+        <div style="width:10px;height:10px;border-radius:50%;background:${c.color};flex-shrink:0"></div>
+        <span class="mono" style="color:${c.color};min-width:70px;font-size:.72rem">${c.code}</span>
+        <span style="flex:1;font-weight:600">${c.short}</span>
+        <span class="badge b-gray">Slot ${c.slot}</span>
+        <span class="small muted">📍 ${c.room||'—'}</span>
+      </div>`;
+    });
+  }
+
+  if(parsed.calendarEvents?.length) {
+    html += `<div class="bold small mb6 mt12" style="text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">Calendar Events (${parsed.calendarEvents.length})</div>`;
+    parsed.calendarEvents.slice(0,12).forEach(ev => {
+      html += `<div class="import-event-row">
+        <span class="mono small" style="color:var(--accent2);min-width:85px">${ev.date}</span>
+        <span style="font-weight:600">${ev.name}</span>
+        <span class="muted small" style="flex:1;text-align:right">${ev.sub||''}</span>
+      </div>`;
+    });
+    if(parsed.calendarEvents.length > 12) {
+      html += `<div class="small muted" style="padding:4px 10px">…and ${parsed.calendarEvents.length - 12} more events</div>`;
+    }
+  }
+
+  document.getElementById('import-preview-content').innerHTML = html;
+  document.getElementById('import-preview').style.display = 'block';
+  document.getElementById('import-preview').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function applyImport() {
+  if(!pendingImport) return;
+  const p = pendingImport;
+
+  // Apply courses
+  if(p.courses?.length) {
+    COURSES.length = 0;
+    p.courses.forEach(c => COURSES.push({
+      code: c.code, name: c.name||c.short, short: c.short||c.code,
+      slot: c.slot||'', room: c.room||'—', credits: c.credits||3, color: c.color||'#64748b'
+    }));
+    save('iit_courses', COURSES);
+  }
+
+  // Apply calendar events — merge with existing, avoid duplicates by date+name
+  if(p.calendarEvents?.length) {
+    const existing = load('iit_cal_events') || [];
+    const merged = [...existing];
+    p.calendarEvents.forEach(ev => {
+      if(!merged.find(e=>e.date===ev.date && e.name===ev.name)) merged.push(ev);
+    });
+    merged.sort((a,b)=>a.date.localeCompare(b.date));
+    save('iit_cal_events', merged);
+    // Also inject into live CAL_EVENTS array
+    CAL_EVENTS.length = 0;
+    merged.forEach(e => CAL_EVENTS.push(e));
+  }
+
+  // Apply semester info
+  if(p.semesterInfo) {
+    save('iit_sem_info', p.semesterInfo);
+  }
+
+  // Apply lab schedule
+  if(p.labSchedule?.length) {
+    save('iit_lab_sched', p.labSchedule);
+    LAB_SCHED.length = 0;
+    p.labSchedule.forEach(l => {
+      LAB_SCHED.push([l.courseCode, {Mon:l.Mon||'—',Tue:l.Tue||'—',Wed:l.Wed||'—',Thu:l.Thu||'—',Fri:l.Fri||'—'}, l.time||'2:00–5:00 PM']);
+    });
+  }
+
+  pendingImport = null;
+  document.getElementById('import-preview').style.display = 'none';
+  uploadedFiles = { tt: null, cal: null };
+  ['dz-tt','dz-cal'].forEach(id => {
+    document.getElementById(id).classList.remove('has-file');
+  });
+  document.getElementById('dz-tt-preview').innerHTML  = `<div style="font-size:1.5rem">📸</div><div class="small" style="font-weight:600;margin-top:6px">Timetable / Schedule</div><div class="small muted">Image, PDF or Excel</div>`;
+  document.getElementById('dz-cal-preview').innerHTML = `<div style="font-size:1.5rem">📅</div><div class="small" style="font-weight:600;margin-top:6px">Academic Calendar</div><div class="small muted">Image, PDF or Excel</div>`;
+
+  renderSettings();
+  renderToday();
+  showToast('✅ Tracker updated from import!');
+  setParseStatus('', '');
+  // Check for conflicts in newly imported courses
+  setTimeout(() => detectAndResolveConflicts(() => { renderToday(); renderSettings(); }), 300);
+}
+
+function cancelImport() {
+  pendingImport = null;
+  document.getElementById('import-preview').style.display = 'none';
+  setParseStatus('', '');
+}
+
+// ════════════════════════════════
+//  ATTENDANCE TRACKER
+// ════════════════════════════════
+let attLog = load('iit_att') || {};
+let attSelStatus = 'P';
+const MIN_ATT = 80;
+
+function attCourses() {
+  return COURSES.filter(c => c.slot !== 'LAB' && c.slot !== '' && c.slot !== 'NS');
+}
+
+function attStats(code) {
+  const log = attLog[code] || {};
+  const entries = Object.values(log);
+  const total   = entries.filter(e => e.status !== 'C').length;
+  const present = entries.filter(e => e.status === 'P').length;
+  const absent  = entries.filter(e => e.status === 'A').length;
+  const pct     = total ? Math.round(present / total * 100) : 100;
+  const canBunk = Math.max(0, Math.floor(present / (MIN_ATT/100)) - total);
+  const needed  = pct >= MIN_ATT ? 0 : Math.ceil((MIN_ATT/100 * total - present) / (1 - MIN_ATT/100));
+  return { total, present, absent, pct, canBunk, needed };
+}
+
+function renderAttend() {
+  const weekSel = document.getElementById('att-week-sel');
+  const semStart = new Date('2026-01-05');
+  const semEnd   = new Date('2026-04-24');
+  const weeks = [];
+  let d = new Date(semStart);
+  while(d <= semEnd) {
+    const we = new Date(d); we.setDate(we.getDate()+6);
+    weeks.push({ start: dk(d), end: dk(we), label: `Week of ${d.getDate()} ${MONTHS[d.getMonth()]}` });
+    d.setDate(d.getDate()+7);
+  }
+  weekSel.innerHTML = weeks.map(w=>`<option value="${w.start}" ${w.start<=TODAY&&w.end>=TODAY?'selected':''}>${w.label}</option>`).join('');
+
+  const courses = attCourses();
+  const overall = (() => {
+    let tot=0,pre=0;
+    courses.forEach(c=>{ const s=attStats(c.code); tot+=s.total; pre+=s.present; });
+    return tot ? Math.round(pre/tot*100) : 100;
+  })();
+  const danger = courses.filter(c=>attStats(c.code).pct < MIN_ATT).length;
+  const warn   = courses.filter(c=>{ const s=attStats(c.code); return s.pct>=MIN_ATT && s.pct<85; }).length;
+
+  document.getElementById('att-summary').innerHTML = `
+    <div class="card" style="text-align:center">
+      <div class="small muted mb4">Overall Attendance</div>
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${overall>=75?'#4ade80':overall>=60?'#fbbf24':'#f87171'}">${overall}%</div>
+      <div class="small muted">across ${courses.length} courses</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="small muted mb4">⚠️ Below 75%</div>
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${danger?'#f87171':'#4ade80'}">${danger}</div>
+      <div class="small muted">courses at risk</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="small muted mb4">🟡 Warning Zone</div>
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${warn?'#fbbf24':'#4ade80'}">${warn}</div>
+      <div class="small muted">courses 75–80%</div>
+    </div>`;
+
+  document.getElementById('att-courses').innerHTML = courses.map(c=>{
+    const s = attStats(c.code);
+    const barCls = s.pct>=80?'safe':s.pct>=75?'warn':'danger';
+    return `<div class="att-course-card">
+      <div class="att-course-header">
+        <div class="row" style="gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${c.color}"></div>
+          <div class="bold" style="font-size:.88rem">${c.short}</div>
+          <div class="small muted mono">${c.code}</div>
+        </div>
+        <div style="font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${s.pct>=75?'#4ade80':s.pct>=60?'#fbbf24':'#f87171'}">${s.pct}%</div>
+      </div>
+      <div class="att-bar-wrap"><div class="att-bar ${barCls}" style="width:${Math.min(s.pct,100)}%"></div></div>
+      <div class="att-stats">
+        <div class="att-stat"><div class="val" style="color:#4ade80">${s.present}</div><div class="lbl">Present</div></div>
+        <div class="att-stat"><div class="val" style="color:#f87171">${s.absent}</div><div class="lbl">Absent</div></div>
+        <div class="att-stat"><div class="val">${s.total}</div><div class="lbl">Total</div></div>
+      </div>
+      ${s.pct < MIN_ATT
+        ? `<div class="att-warning">⚠️ Attend next <strong>${s.needed}</strong> class${s.needed!==1?'es':''} consecutively to reach 75%</div>`
+        : s.canBunk>0
+          ? `<div class="att-ok">✓ You can miss <strong>${s.canBunk}</strong> more class${s.canBunk!==1?'es':''} and stay above 75%</div>`
+          : `<div class="att-warning">⚠️ Cannot miss any more — right at 75%</div>`
+      }
+    </div>`;
+  }).join('');
+
+  // Log course filter
+  const logSel = document.getElementById('att-log-course');
+  const prev = logSel.value;
+  logSel.innerHTML = '<option value="all">All Courses</option>' +
+    courses.map(c=>`<option value="${c.code}" ${prev===c.code?'selected':''}>${c.code} — ${c.short}</option>`).join('');
+  renderAttendLog();
+}
+
+function renderAttendLog() {
+  const filterCourse = document.getElementById('att-log-course')?.value || 'all';
+  const filterWeek   = document.getElementById('att-week-sel')?.value || TODAY;
+  const weekEnd      = (() => { const d=dateObj(filterWeek); d.setDate(d.getDate()+6); return dk(d); })();
+  const courses = filterCourse==='all' ? attCourses() : attCourses().filter(c=>c.code===filterCourse);
+  const entries = [];
+  courses.forEach(c => {
+    Object.entries(attLog[c.code]||{}).forEach(([date,v]) => {
+      if(date >= filterWeek && date <= weekEnd) entries.push({...v, date, courseCode:c.code, color:c.color, short:c.short});
+    });
+  });
+  entries.sort((a,b)=>b.date.localeCompare(a.date));
+  const statusLabel = {P:'✓ Present', A:'✗ Absent', C:'📋 Cancelled'};
+  const statusColor = {P:'#4ade80', A:'#f87171', C:'#818cf8'};
+  document.getElementById('att-log').innerHTML = entries.length
+    ? entries.map(e=>`<div class="att-log-row">
+        <div style="min-width:80px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)">${fmtDate(e.date)}</div>
+        <div style="width:8px;height:8px;border-radius:50%;background:${e.color};flex-shrink:0"></div>
+        <div style="flex:1;font-size:.82rem;font-weight:500">${e.short}</div>
+        <div style="font-size:.75rem;font-weight:700;color:${statusColor[e.status]}">${statusLabel[e.status]}</div>
+        ${e.note?`<div class="small muted">${e.note}</div>`:''}
+        <button class="ibtn del" onclick="delAttEntry('${e.courseCode}','${e.date}')">🗑</button>
+      </div>`).join('')
+    : '<div class="muted small" style="padding:20px 0;text-align:center">No records this week.</div>';
+}
+
+function attMarkToday() {
+  const courses = attCourses();
+  document.getElementById('att-course-sel').innerHTML =
+    courses.map(c=>`<option value="${c.code}">${c.code} — ${c.short}</option>`).join('');
+  document.getElementById('att-date').value = TODAY;
+  document.getElementById('att-note').value = '';
+  selectAttStatus('P');
+  document.getElementById('modal-attend').classList.add('on');
+}
+
+function selectAttStatus(s) {
+  attSelStatus = s;
+  ['P','A','C','L'].forEach(x => {
+    document.getElementById(`att-btn-${x}`)?.classList.toggle('active', x===s);
+  });
+}
+
+function saveAttendance() {
+  const date = document.getElementById('att-date').value;
+  const code = document.getElementById('att-course-sel').value;
+  const note = document.getElementById('att-note').value.trim();
+  if(!date||!code) return;
+  if(!attLog[code]) attLog[code] = {};
+  attLog[code][date] = { status: attSelStatus, note };
+  save('iit_att', attLog);
+  closeModal('attend');
+  renderAttend();
+  showToast('Attendance saved ✓');
+}
+
+function delAttEntry(code, date) {
+  if(!attLog[code]) return;
+  delete attLog[code][date];
+  save('iit_att', attLog);
+  renderAttend();
+}
+
+// Day-based attendance marking
+let dayAttendance = {};
+
+function getCoursesForDay(dayKey) {
+  const slots = SLOTS_PER_DAY[dayKey] || [];
+  const courses = [];
+  const seenCodes = new Set();
+  
+  slots.forEach(({s}) => {
+    if(s === 'LUNCH') return;
+    const codes = getSlotCodes()[s] || [];
+    codes.forEach(code => {
+      if(!seenCodes.has(code)) {
+        const c = course(code);
+        if(c.slot !== 'LAB' && c.slot !== '' && c.slot !== 'NS') {
+          courses.push(c);
+          seenCodes.add(code);
+        }
+      }
+    });
+  });
+  
+  return courses;
+}
+
+function renderDayCourses() {
+  const day = document.getElementById('att-day-selector').value;
+  const courses = getCoursesForDay(day);
+  const container = document.getElementById('day-courses-list');
+  
+  if(courses.length === 0) {
+    container.innerHTML = '<div class="muted small" style="padding:20px 0;text-align:center">No classes on this day</div>';
+    document.getElementById('day-marked-count').textContent = '0';
+    return;
+  }
+  
+  dayAttendance = {};
+  courses.forEach(c => dayAttendance[c.code] = 'P');
+  
+  let html = courses.map(c => {
+    const stats = attStats(c.code);
+    const attColor = stats.pct >= 75 ? '#4ade80' : stats.pct >= 60 ? '#fbbf24' : '#f87171';
+    
+    return `<div class="att-course-card" style="margin-bottom:10px">
+      <div class="between mb8">
+        <div class="row" style="gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${c.color}"></div>
+          <div>
+            <div class="bold" style="font-size:.88rem">${c.short}</div>
+            <div class="small muted mono">${c.code} - ${c.room}</div>
+          </div>
+        </div>
+        <div style="text-align:right">
+          <div style="font-size:1.2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${attColor}">${stats.pct}%</div>
+          <div class="small muted">${stats.present}/${stats.total} classes</div>
+        </div>
+      </div>
+      <div class="row" style="gap:6px;flex-wrap:wrap">
+        <button class="att-status-btn att-p active" id="day-btn-${c.code}-P" onclick="setDayAttStatus('${c.code}','P')">Present</button>
+        <button class="att-status-btn att-a" id="day-btn-${c.code}-A" onclick="setDayAttStatus('${c.code}','A')">Absent</button>
+        <button class="att-status-btn att-c" id="day-btn-${c.code}-C" onclick="setDayAttStatus('${c.code}','C')">Cancelled</button>
+      </div>
+    </div>`;
+  }).join('');
+  
+  container.innerHTML = html;
+  updateMarkedCount();
+}
+
+function setDayAttStatus(code, status) {
+  dayAttendance[code] = status;
+  ['P','A','C'].forEach(s => {
+    const btn = document.getElementById(`day-btn-${code}-${s}`);
+    if(btn) btn.classList.toggle('active', s === status);
+  });
+  updateMarkedCount();
+}
+
+function updateMarkedCount() {
+  const count = Object.keys(dayAttendance).length;
+  document.getElementById('day-marked-count').textContent = count;
+}
+
+function saveDayAttendance() {
+  const day = document.getElementById('att-day-selector').value;
+  const courses = getCoursesForDay(day);
+  
+  if(courses.length === 0) {
+    showToast('No classes on this day');
+    return;
+  }
+  
+  const dayMap = {Mon:1, Tue:2, Wed:3, Thu:4, Fri:5, Sat:6, Sun:0};
+  const targetDay = dayMap[day];
+  const currentDay = now.getDay();
+  const daysDiff = targetDay - currentDay;
+  const targetDate = new Date(now);
+  targetDate.setDate(now.getDate() + daysDiff);
+  const saveDate = dk(targetDate);
+  
+  let saved = 0;
+  courses.forEach(c => {
+    const status = dayAttendance[c.code] || 'P';
+    if(!attLog[c.code]) attLog[c.code] = {};
+    attLog[c.code][saveDate] = { status, note: `Marked for ${day}` };
+    saved++;
+  });
+  
+  save('iit_att', attLog);
+  renderAttend();
+  showToast(`Attendance saved for ${saved} course${saved!==1?'s':''} on ${fmtDate(saveDate)}`);
+}
+
+const originalRenderAttend = renderAttend;
+renderAttend = function() {
+  originalRenderAttend();
+  const today = DAYS_ARR[now.getDay()];
+  if(['Mon','Tue','Wed','Thu','Fri'].includes(today)) {
+    document.getElementById('att-day-selector').value = today;
+    renderDayCourses();
+  }
+}
+
+// ════════════════════════════════
+//  MOODLE INTEGRATION
+// ════════════════════════════════
+function detectAndResolveConflicts(onDone) {
+  // Group courses by slot (excluding LAB)
+  const slotMap = {};
+  COURSES.forEach(c => {
+    if(!c.slot || c.slot === 'LAB' || c.slot === '') return;
+    if(!slotMap[c.slot]) slotMap[c.slot] = [];
+    slotMap[c.slot].push(c);
+  });
+
+  // Find slots with more than one course
+  const conflicts = Object.entries(slotMap).filter(([,courses]) => courses.length > 1);
+
+  if(!conflicts.length) { if(onDone) onDone(); return; }
+
+  conflictData = {};
+  conflicts.forEach(([slot, courses]) => conflictData[slot] = courses);
+
+  // Build modal content
+  let html = '';
+  conflicts.forEach(([slot, courses]) => {
+    const time = SLOT_TIMES[slot] || '';
+    html += `<div class="conflict-slot-block">
+      <div class="conflict-slot-label">Slot ${slot}</div>
+      <div class="conflict-slot-time">${time}</div>
+      <div class="conflict-options" id="conflict-opts-${slot}">
+        ${courses.map((c,i) => `
+          <label class="conflict-opt" id="conflict-lbl-${slot}-${c.code}" onclick="selectConflictOpt('${slot}','${c.code}')">
+            <input type="radio" name="conflict-${slot}" value="${c.code}" ${i===0?'checked':''}>
+            <div class="conflict-opt-dot" style="background:${c.color}"></div>
+            <div class="conflict-opt-info">
+              <div class="conflict-opt-code" style="color:${c.color}">${c.code}</div>
+              <div class="conflict-opt-name">${c.name||c.short}</div>
+            </div>
+            <span class="badge b-gray">📍 ${c.room||'—'}</span>
+          </label>`).join('')}
+      </div>
+    </div>`;
+  });
+
+  document.getElementById('conflict-slots').innerHTML = html;
+  document.getElementById('conflict-desc').textContent =
+    `${conflicts.length} slot${conflicts.length>1?'s have':'has'} multiple courses. Pick the one you actually attend for each.`;
+
+  // Pre-select first option styling
+  conflicts.forEach(([slot, courses]) => {
+    selectConflictOpt(slot, courses[0].code);
+  });
+
+  // Store callback
+  window._conflictDone = onDone;
+  document.getElementById('modal-conflict').classList.add('on');
+}
+
+function selectConflictOpt(slot, code) {
+  const opts = document.querySelectorAll(`#conflict-opts-${slot} .conflict-opt`);
+  opts.forEach(el => el.classList.remove('selected'));
+  const radio = document.querySelector(`#conflict-opts-${slot} input[value="${code}"]`);
+  if(radio) {
+    radio.checked = true;
+    radio.closest('.conflict-opt').classList.add('selected');
+  }
+}
+
+function resolveConflicts() {
+  Object.keys(conflictData).forEach(slot => {
+    const radio = document.querySelector(`input[name="conflict-${slot}"]:checked`);
+    if(!radio) return;
+    const chosen = radio.value;
+    // Remove this slot from ALL courses in that slot, then re-assign to chosen
+    COURSES.forEach(c => { if(c.slot === slot) c.slot = ''; });
+    const c = COURSES.find(x => x.code === chosen);
+    if(c) c.slot = slot;
+  });
+
+  save('iit_courses', COURSES);
+  document.getElementById('modal-conflict').classList.remove('on');
+  showToast('✅ Slots resolved!');
+
+  if(window._conflictDone) { window._conflictDone(); window._conflictDone = null; }
+  else { renderToday(); renderSettings(); }
+}
+
+// ════════════════════════════════
+//  STUDY — POMODORO + AI TUTOR
+// ════════════════════════════════
+const POMO_MODES = { focus:90, short:5, long:20 };
+let pomoMode = 'focus';
+let pomoDurations = { focus: load('pomo_dur_focus')||90, short: load('pomo_dur_short')||5, long: load('pomo_dur_long')||20 };
+let pomoTotal = pomoDurations.focus * 60;
+let pomoLeft  = pomoTotal;
+let pomoRunning = false;
+let pomoTimer  = null;
+let pomoSessions = 0;
+let studyLog = load('study_log') || {}; // {dateKey: {focusMins, sessions}}
+
+function initPomoDisplay() {
+  document.getElementById('dur-focus').value = pomoDurations.focus;
+  document.getElementById('dur-short').value = pomoDurations.short;
+  document.getElementById('dur-long').value  = pomoDurations.long;
+  // Load today stats
+  const today = studyLog[TODAY] || {focusMins:0, sessions:0};
+  pomoSessions = today.sessions;
+  updatePomoDisplay();
+  renderStudyWeek();
+}
+
+function setPMode(mode, btn) {
+  pomoMode = mode;
+  document.querySelectorAll('[id^="pmode-"]').forEach(b=>b.classList.remove('on'));
+  btn.classList.add('on');
+  pomoTotal = pomoDurations[mode] * 60;
+  pomoLeft  = pomoTotal;
+  pomoRunning = false;
+  clearInterval(pomoTimer);
+  document.getElementById('pomo-btn').textContent = '▶ Start';
+  const labels = {focus:'Focus Session', short:'Short Break', long:'Long Break'};
+  const colors  = {focus:'var(--accent)', short:'#4ade80', long:'#fbbf24'};
+  document.getElementById('pomo-label').textContent = labels[mode];
+  document.getElementById('pomo-ring').style.stroke = colors[mode];
+  updatePomoDisplay();
+}
+
+function togglePomo() {
+  if(pomoRunning) {
+    pomoRunning = false;
+    clearInterval(pomoTimer);
+    document.getElementById('pomo-btn').textContent = '▶ Resume';
+  } else {
+    pomoRunning = true;
+    document.getElementById('pomo-btn').textContent = '⏸ Pause';
+    pomoTimer = setInterval(() => {
+      pomoLeft--;
+      updatePomoDisplay();
+      if(pomoLeft <= 0) {
+        clearInterval(pomoTimer);
+        pomoRunning = false;
+        onPomoComplete();
+      }
+    }, 1000);
+  }
+}
+
+function resetPomo() {
+  clearInterval(pomoTimer);
+  pomoRunning = false;
+  pomoLeft = pomoDurations[pomoMode] * 60;
+  pomoTotal = pomoLeft;
+  document.getElementById('pomo-btn').textContent = '▶ Start';
+  updatePomoDisplay();
+}
+
+function updatePomoDisplay() {
+  const m = Math.floor(pomoLeft/60), s = pomoLeft%60;
+  document.getElementById('pomo-time').textContent = `${String(m).padStart(2,'0')}:${String(s).padStart(2,'0')}`;
+  // Update ring
+  const circ = 2 * Math.PI * 80; // 502.65
+  const offset = circ * (1 - pomoLeft/pomoTotal);
+  document.getElementById('pomo-ring').style.strokeDashoffset = offset;
+  // Dots
+  const dots = document.getElementById('pomo-dots');
+  dots.innerHTML = Array.from({length:Math.min(pomoSessions,8)},(_,i)=>
+    `<div class="pomo-dot done"></div>`).join('') +
+    (pomoSessions>8?`<span class="small muted">+${pomoSessions-8}</span>`:'');
+  document.getElementById('pomo-count').textContent = pomoSessions;
+  // Stats
+  const today = studyLog[TODAY] || {focusMins:0, sessions:0};
+  const h = Math.floor(today.focusMins/60), min = today.focusMins%60;
+  document.getElementById('stat-focus-time').textContent = `${h}h ${min}m`;
+  document.getElementById('stat-sessions').textContent = today.sessions;
+}
+
+function onPomoComplete() {
+  document.getElementById('pomo-btn').textContent = '▶ Start';
+  pomoLeft = pomoDurations[pomoMode] * 60;
+  updatePomoDisplay();
+  // Only count focus sessions
+  if(pomoMode === 'focus') {
+    if(!studyLog[TODAY]) studyLog[TODAY] = {focusMins:0, sessions:0};
+    studyLog[TODAY].focusMins += pomoDurations.focus;
+    studyLog[TODAY].sessions++;
+    pomoSessions = studyLog[TODAY].sessions;
+    save('study_log', studyLog);
+    renderStudyWeek();
+  }
+  // Browser notification
+  if(Notification.permission === 'granted') {
+    new Notification(pomoMode==='focus' ? '🎉 Focus session complete! Take a break.' : '⏱ Break over! Time to focus.', {icon:'🎓'});
+  } else if(Notification.permission !== 'denied') {
+    Notification.requestPermission();
+  }
+  // Auto-switch mode
+  if(pomoMode==='focus') {
+    setPMode(pomoSessions%4===0?'long':'short', document.getElementById(pomoSessions%4===0?'pmode-long':'pmode-short'));
+  } else {
+    setPMode('focus', document.getElementById('pmode-focus'));
+  }
+}
+
+function updateDurations() {
+  pomoDurations.focus = parseInt(document.getElementById('dur-focus').value)||25;
+  pomoDurations.short = parseInt(document.getElementById('dur-short').value)||5;
+  pomoDurations.long  = parseInt(document.getElementById('dur-long').value)||15;
+  save('pomo_dur_focus', pomoDurations.focus);
+  save('pomo_dur_short', pomoDurations.short);
+  save('pomo_dur_long',  pomoDurations.long);
+  pomoTotal = pomoDurations[pomoMode]*60;
+  pomoLeft  = pomoTotal;
+  updatePomoDisplay();
+}
+
+function renderStudyWeek() {
+  const days = Array.from({length:7},(_,i)=>{ const d=new Date(now); d.setDate(d.getDate()-6+i); return dk(d); });
+  const maxMins = Math.max(1, ...days.map(d=>(studyLog[d]||{}).focusMins||0));
+  const bars = document.getElementById('study-week-bars');
+  const lbls = document.getElementById('study-week-labels');
+  bars.innerHTML = days.map(d=>{
+    const mins = (studyLog[d]||{}).focusMins||0;
+    const h = Math.round(mins/maxMins*100);
+    const isToday = d===TODAY;
+    return `<div class="study-bar" style="height:${Math.max(h,4)}%;background:${isToday?'var(--accent2)':'var(--accent)'}; opacity:${mins?1:0.2}" title="${mins} min"></div>`;
+  }).join('');
+  lbls.innerHTML = days.map(d=>{
+    const day = ['Su','Mo','Tu','We','Th','Fr','Sa'][new Date(d).getDay()];
+    return `<div class="study-bar-label">${day}</div>`;
+  }).join('');
+}
+
+// ── NOTES + FLOWCHART GENERATOR ──
+let notesFile = null;
+let lastNotesText = '';
+let lastFlowSVG  = '';
+
+function notesDrop(e) {
+  e.preventDefault(); dzLeave('notes-dz');
+  const file = e.dataTransfer.files[0];
+  if(file) loadNotesFile(file);
+}
+function handleNotesFile(input) {
+  const file = input.files[0]; if(file) loadNotesFile(file);
+}
+function loadNotesFile(file) {
+  const reader = new FileReader();
+  const isImg = file.type.startsWith('image/');
+  reader.onload = e => {
+    const dataUrl = e.target.result;
+    notesFile = { base64: dataUrl.split(',')[1], mediaType: file.type||'image/jpeg', name: file.name, isImg };
+    const dz = document.getElementById('notes-dz');
+    dz.classList.add('has-file');
+    document.getElementById('notes-dz-preview').innerHTML = isImg
+      ? `<img src="${dataUrl}" class="dz-thumb"><div class="small" style="color:var(--success);font-weight:600">✓ ${file.name}</div>`
+      : `<div style="font-size:2rem">📄</div><div class="small" style="color:var(--success);font-weight:600">✓ ${file.name}</div>`;
+    document.getElementById('notes-gen-btn').disabled = false;
+    document.getElementById('notes-status').textContent = '';
+  };
+  reader.readAsDataURL(file);
+}
+function clearNotesFile() {
+  notesFile = null;
+  document.getElementById('notes-dz').classList.remove('has-file');
+  document.getElementById('notes-dz-preview').innerHTML = `<div style="font-size:2rem">📚</div><div class="small" style="font-weight:600;margin-top:6px">Drop your PDF or image here</div><div class="small muted">Lecture notes, slides, textbook pages</div>`;
+  document.getElementById('notes-gen-btn').disabled = true;
+  document.getElementById('notes-file').value = '';
+  document.getElementById('notes-output-card').style.display = 'none';
+  document.getElementById('flow-output-card').style.display  = 'none';
+  document.getElementById('notes-status').textContent = '';
+}
+
+async function generateNotes() {
+  if(!notesFile) return;
+  const btn = document.getElementById('notes-gen-btn');
+  btn.disabled = true;
+  btn.innerHTML = '<span class="parse-spinner"></span> Generating…';
+  setNotesStatus('Step 1/2 — Reading your document…', '');
+
+  const fileBlock = notesFile.isImg
+    ? { type:'image', source:{ type:'base64', media_type: notesFile.mediaType, data: notesFile.base64 }}
+    : { type:'document', source:{ type:'base64', media_type:'application/pdf', data: notesFile.base64 }};
+
+  try {
+    // ── PASS 1: Generate detailed notes ──
+    const notesRes = await fetch(PROXY_URL, {
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:4000,
+        messages:[{ role:'user', content:[
+          fileBlock,
+          { type:'text', text:`You are an expert academic note-taker for an IIT Mandi BTech student.
+
+Read this document carefully and generate BEAUTIFULLY DETAILED NOTES in this exact format:
+
+# 📘 [Topic Title]
+
+## 🎯 Key Objectives
+- What this topic is about (2-3 bullet points)
+
+## 📖 Core Concepts
+
+### [Concept 1 Name]
+**Definition:** Clear, precise definition
+**Key Points:**
+- Point 1
+- Point 2
+**Formula/Rule:** (if applicable) \`formula here\`
+**Example:** Concrete example
+
+### [Concept 2 Name]
+[same structure]
+
+(cover ALL concepts in the document)
+
+## ⚡ Quick Summary
+3-5 sentence summary of the entire topic
+
+## 🔑 Key Formulas & Rules
+| Formula/Rule | What it means |
+|---|---|
+| ... | ... |
+
+## ❓ Important Questions to Know
+1. Question 1?
+2. Question 2?
+3. Question 3?
+
+## 💡 Tips & Tricks
+- Any mnemonics, shortcuts or exam tips
+
+Be thorough. Cover EVERY concept shown. Use clear headers and formatting.`
+          }
+        ]
+      }]
+    })
+    });
+    const notesData = await notesRes.json();
+    if(notesData.error) throw new Error(notesData.error.message);
+    lastNotesText = notesData.content?.find(b=>b.type==='text')?.text || '';
+    renderNotes(lastNotesText);
+
+    // ── PASS 2: Generate flowchart ──
+    setNotesStatus('Step 2/2 — Building flowchart…', '');
+    const flowRes = await fetch(PROXY_URL, {
+      method:'POST', headers:{'Content-Type':'application/json', 'X-Worker-Secret': WORKER_SECRET},
+      body: JSON.stringify({
+        model:'claude-haiku-4-5-20251001', max_tokens:3000,
+        messages:[{ role:'user', content:[
+          fileBlock,
+          { type:'text', text:`Create a concept flowchart for this document as a raw SVG (no markdown, no backticks, just the SVG code starting with <svg).
+
+Requirements:
+- viewBox="0 0 900 600" (or taller if needed)
+- Dark background: rect fill="#0d1526"
+- Show the main topic at top, branching into subtopics, then details
+- Use rounded rectangles (rx="8") for nodes
+- Main topic: fill="#2563eb", white text, font-size="15"
+- Sub topics: fill="#1e2535", border stroke="#4f8ef7", text fill="#93c5fd", font-size="12"
+- Detail nodes: fill="#141f35", border stroke="#374151", text fill="#9ca3af", font-size="11"
+- Connector lines: stroke="#374151", stroke-width="1.5", marker arrows
+- Wrap long text with <tspan> elements
+- Cover ALL main concepts from the document
+- Make it visually clear and well-spaced
+
+Return ONLY the SVG code, nothing else.`
+          }
+        ]
+      }]
+    })
+    });
+    const flowData = await flowRes.json();
+    if(flowData.error) throw new Error(flowData.error.message);
+    lastFlowSVG = flowData.content?.find(b=>b.type==='text')?.text || '';
+    renderFlowchart(lastFlowSVG);
+    setNotesStatus('✓ Notes and flowchart ready!', 'ok');
+
+  } catch(err) {
+    setNotesStatus('❌ ' + err.message, 'err');
+  } finally {
+    btn.disabled = false;
+    btn.innerHTML = '✨ Generate Notes &amp; Flowchart';
+  }
+}
+
+function renderNotes(md) {
+  const el = document.getElementById('notes-content');
+  // Convert markdown to HTML
+  let html = md
+    .replace(/^# (.+)$/gm, '<h1 style="font-size:1.15rem;font-weight:800;color:var(--text);margin:0 0 12px;padding-bottom:8px;border-bottom:2px solid var(--accent)">$1</h1>')
+    .replace(/^## (.+)$/gm, '<h2 style="font-size:.95rem;font-weight:700;color:var(--accent2);margin:16px 0 8px;text-transform:uppercase;letter-spacing:.04em">$1</h2>')
+    .replace(/^### (.+)$/gm, '<h3 style="font-size:.88rem;font-weight:700;color:var(--text);margin:12px 0 6px">$1</h3>')
+    .replace(/\*\*(.+?)\*\*/g, '<strong style="color:var(--accent3)">$1</strong>')
+    .replace(/`(.+?)`/g, '<code style="background:rgba(37,99,235,.15);color:var(--accent3);padding:1px 6px;border-radius:4px;font-family:monospace;font-size:.8rem">$1</code>')
+    .replace(/^\| (.+) \|$/gm, (m,p) => {
+      const cells = p.split(' | ');
+      return `<tr>${cells.map(c=>`<td style="padding:5px 10px;border:1px solid var(--border);font-size:.78rem">${c}</td>`).join('')}</tr>`;
+    })
+    .replace(/(<tr>.*<\/tr>\n?)+/gs, m => `<table style="width:100%;border-collapse:collapse;margin:8px 0">${m}</table>`)
+    .replace(/^\|---.*$/gm, '')
+    .replace(/^- (.+)$/gm, '<li style="margin-bottom:3px;padding-left:4px">$1</li>')
+    .replace(/(<li.*<\/li>\n?)+/gs, m => `<ul style="margin:4px 0 8px 16px;padding:0">${m}</ul>`)
+    .replace(/^\d+\. (.+)$/gm, '<li style="margin-bottom:3px">$1</li>')
+    .replace(/\n\n/g, '<br>')
+    .replace(/\n/g, '<br>');
+  el.innerHTML = html;
+  document.getElementById('notes-output-card').style.display = 'block';
+  document.getElementById('notes-output-card').scrollIntoView({behavior:'smooth', block:'nearest'});
+}
+
+function renderFlowchart(svgText) {
+  const clean = svgText.replace(/```svg|```/g,'').trim();
+  if(!clean.startsWith('<svg')) { return; }
+  document.getElementById('flow-content').innerHTML = clean;
+  document.getElementById('flow-output-card').style.display = 'block';
+  lastFlowSVG = clean;
+}
+
+function setNotesStatus(msg, type) {
+  const el = document.getElementById('notes-status');
+  el.innerHTML = msg;
+  el.style.color = type==='ok'?'var(--success)':type==='err'?'#f87171':'var(--muted)';
+}
+
+function copyNotes() {
+  navigator.clipboard.writeText(lastNotesText).then(()=>showToast('Notes copied!'));
+}
+
+function downloadNotes() {
+  if(!lastNotesText) return;
+  const fname = notesFile?.name?.replace(/\.[^.]+$/,'')||'notes';
+  const blob = new Blob([lastNotesText], {type:'text/markdown'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`${fname}_notes.md`; a.click();
+}
+
+function downloadFlowchart() {
+  if(!lastFlowSVG) return;
+  const fname = notesFile?.name?.replace(/\.[^.]+$/,'')||'flowchart';
+  const blob = new Blob([lastFlowSVG], {type:'image/svg+xml'});
+  const a = document.createElement('a'); a.href=URL.createObjectURL(blob);
+  a.download=`${fname}_flowchart.svg`; a.click();
+}
+
+// ════════════════════════════════
+//  INIT
+// ════════════════════════════════
+(()=>{
+  const savedCal = load('iit_cal_events');
+  if(savedCal?.length) { CAL_EVENTS.length=0; savedCal.forEach(e=>CAL_EVENTS.push(e)); }
+  const savedLab = load('iit_lab_sched');
+  if(savedLab?.length) {
+    LAB_SCHED.length=0;
+    savedLab.forEach(l=>LAB_SCHED.push([l.courseCode,{Mon:l.Mon||'—',Tue:l.Tue||'—',Wed:l.Wed||'—',Thu:l.Thu||'—',Fri:l.Fri||'—'},l.time||'2:00–5:00 PM']));
+  }
+  // Check for conflicts on startup
+  detectAndResolveConflicts(() => { renderToday(); });
+})();
+</script>
+
+<script>
+
+// ── PAGE INIT ──
+(function() {
+  const savedCal = load('iit_cal_events');
+  if(savedCal?.length) { CAL_EVENTS.length=0; savedCal.forEach(e=>CAL_EVENTS.push(e)); }
+  const savedLab = load('iit_lab_sched');
+  if(savedLab?.length) {
+    LAB_SCHED.length=0;
+    savedLab.forEach(l=>LAB_SCHED.push([l.courseCode,{Mon:l.Mon||'—',Tue:l.Tue||'—',Wed:l.Wed||'—',Thu:l.Thu||'—',Fri:l.Fri||'—'},l.time||'2:00—5:00 PM']));
+  }
+  const now = new Date();
+  document.getElementById('nav-date').textContent = now.toLocaleDateString('en-GB',{weekday:'long',day:'numeric',month:'short',year:'numeric'});
+  
+  // Display user name
+  const profile = (function(){ try{ return JSON.parse(localStorage.getItem('iit_profile')); } catch(e){ return null; } })();
+  const userName = profile?.name ? profile.name.split(' ')[0] : '';
+  const navUserName = document.getElementById('nav-user-name');
+  if(navUserName) navUserName.textContent = userName ? '👤 ' + userName : '';
+  if(profile?.sem) document.getElementById('nav-semester').textContent = profile.sem + ' Semester ' + (profile.acyear||'2025-26');
+  
+  // Display holiday indicator (only show if holiday)
+  const HOLIDAYS = [
+    {date:'01-26',name:'🇮🇳 Republic Day'},{date:'08-15',name:'🇮🇳 Independence Day'},
+    {date:'10-02',name:'🕊️ Gandhi Jayanti'},{date:'01-14',name:'🌞 Makar Sankranti'},
+    {date:'01-23',name:'🎂 Netaji Jayanti'},{date:'03-08',name:'🌸 Holi'},
+    {date:'04-14',name:'🎭 Ambedkar Jayanti'},{date:'04-17',name:'🐍 Mahavir Jayanti'},
+    {date:'08-27',name:'🌙 Janmashtami'},{date:'09-07',name:'🐘 Ganesh Chaturthi'},
+    {date:'10-06',name:'🌾 Dussehra'},{date:'10-20',name:'🪔 Diwali'},
+    {date:'11-05',name:'🌕 Karva Chauth'},{date:'11-14',name:'🎆 Dhanteras'},
+    {date:'12-25',name:'🎄 Christmas'},{date:'05-01',name:'👷 Labour Day'},
+    {date:'04-01',name:'🌿 Ugadi'},{date:'04-14',name:'🌾 Baisakhi'},
+    {date:'09-05',name:'👨‍🏫 Teachers Day'},{date:'11-14',name:'👶 Childrens Day'},
+    {date:'01-12',name:'📖 National Youth Day'},{date:'02-14',name:'💝 Valentines Day'},
+    {date:'06-21',name:'🧘 Yoga Day'},{date:'09-08',name:'📚 Literacy Day'},
+    {date:'10-31',name:'🕯️ Unity Day'},{date:'11-17',name:'🌍 Students Day'},
+    {date:'12-06',name:'🎖️ Armed Forces Day'}
+  ];
+  const todayStr = `${String(now.getMonth()+1).padStart(2,'0')}-${String(now.getDate()).padStart(2,'0')}`;
+  const holiday = HOLIDAYS.find(h => h.date === todayStr);
+  const navHoliday = document.getElementById('nav-holiday');
+  if(navHoliday) {
+    if(holiday) navHoliday.innerHTML = `<span class="badge b-yellow">🎉 ${holiday.name}</span>`;
+    else navHoliday.innerHTML = '';
+  }
+  
+  // Apply saved theme settings
+  applySavedTheme();
 })();
 
 // ════════════════════════════════
 //  THEME FUNCTIONS
 // ════════════════════════════════
 function applySavedTheme() {
-  // Load saved accent color
   const savedAccent = localStorage.getItem('iit_accent');
   if(savedAccent) document.documentElement.style.setProperty('--accent', savedAccent);
-  
-  // Load saved background theme
   const savedBg = localStorage.getItem('iit_bgtheme');
   if(savedBg) {
     const themes = {
@@ -2967,35 +4261,25 @@ function applySavedTheme() {
       document.documentElement.style.setProperty('--s3', t.s3);
     }
   }
-  
-  // Load saved font size
   const savedFont = localStorage.getItem('iit_fontsize');
   if(savedFont) {
     const sizes = {small: '12px', medium: '13.5px', large: '15px'};
     document.body.style.fontSize = sizes[savedFont];
   }
-  
-  // Load saved border radius
   const savedRadius = localStorage.getItem('iit_borderradius');
   if(savedRadius) {
     const radius = {small: '4px', medium: '10px', large: '20px'};
     document.documentElement.style.setProperty('--r', radius[savedRadius]);
   }
-  
-  // Load high contrast
   const savedContrast = localStorage.getItem('iit_highcontrast');
   if(savedContrast === '1') {
     document.documentElement.style.setProperty('--border', 'rgba(255,255,255,0.3)');
     document.documentElement.style.setProperty('--border2', 'rgba(255,255,255,0.5)');
   }
-  
-  // Load reduced motion
   const savedMotion = localStorage.getItem('iit_reducedmotion');
   if(savedMotion === '1') {
     document.documentElement.style.setProperty('--transition-speed', '0s');
   }
-  
-  // Load display mode (light/dark/auto)
   const savedMode = localStorage.getItem('iit_mode');
   if(savedMode) {
     const lightColors = {
@@ -3017,330 +4301,13 @@ function applySavedTheme() {
         document.documentElement.style.setProperty('--' + key, colors[key]);
       });
     }
-    // 'dark' mode is default, no need to change
   }
 }
 
-renderToday();
-</script>
-
-<script>
-
-function saveWorkerSettings() {
-  const proxy  = document.getElementById('settings-proxy')?.value.trim();
-  const secret = document.getElementById('settings-secret')?.value.trim();
-  if(proxy)  localStorage.setItem('iit_proxy_url',     JSON.stringify(proxy));
-  if(secret) localStorage.setItem('iit_worker_secret', JSON.stringify(secret));
-  const st = document.getElementById('worker-save-status');
-  if(st) { st.textContent = 'Saved ✓'; setTimeout(()=>{ st.textContent=''; }, 1500); }
-}
+renderAsgns();
+// Detect conflicts only on Today page (home)
 
 </script>
-
-<script>
-
-// ════════════════════════════════
-//  ONBOARDING
-// ════════════════════════════════
-// Wait for DOM to be fully loaded
-document.addEventListener('DOMContentLoaded', function() {
-  const overlay = document.getElementById('onboarding-overlay');
-
-  // Check for reset parameter in URL
-  const urlParams = new URLSearchParams(window.location.search);
-  if(urlParams.get('reset') === '1') {
-    localStorage.removeItem('iit_onboarded');
-    localStorage.removeItem('iit_profile');
-    console.log('✅ Onboarding reset via URL parameter');
-    if(overlay) overlay.style.display = 'flex';
-  }
-
-  // If already set up, hide overlay and define stub functions
-  if(localStorage.getItem('iit_onboarded')) {
-    if(overlay) overlay.style.display = 'none';
-    window.obNext = function() { console.log('Onboarding complete. Reset in Settings to run again.'); };
-    window.obBack = function() {};
-    window.obPickGrp = function() {};
-    return;
-  }
-  
-  // If overlay doesn't exist, exit (not on home page)
-  if(!overlay) {
-    window.obNext = function() {};
-    window.obBack = function() {};
-    window.obPickGrp = function() {};
-    return;
-  }
-
-  let obStep = 0;
-  let obGrp = 'G1';
-  const TOTAL_STEPS = 3;
-
-  function obUpdateSteps() {
-    for(let i = 0; i < TOTAL_STEPS; i++) {
-      const el = document.getElementById('ob-s' + i);
-      if(!el) continue;
-      el.className = 'ob-step' + (i < obStep ? ' done' : i === obStep ? ' active' : '');
-    }
-    const backBtn = document.getElementById('ob-back-btn');
-    if(backBtn) backBtn.style.display = obStep > 0 ? '' : 'none';
-    const nextBtn = document.getElementById('ob-next-btn');
-    if(nextBtn) nextBtn.textContent = obStep === TOTAL_STEPS - 1 ? '🚀 Launch Tracker' : 'Continue →';
-  }
-
-  function obShowPanel(n) {
-    document.querySelectorAll('.ob-panel').forEach(p => p.classList.remove('active'));
-    const panel = document.getElementById('ob-panel-' + n);
-    if(panel) panel.classList.add('active');
-    obStep = n;
-    obUpdateSteps();
-    if(n === TOTAL_STEPS - 1) obBuildReview();
-  }
-
-  function obShake(id) {
-    const el = document.getElementById(id);
-    if(!el) return;
-    el.style.borderColor = 'var(--danger)';
-    el.style.animation = 'obShake .3s ease';
-    setTimeout(() => { el.style.borderColor = ''; el.style.animation = ''; }, 600);
-  }
-
-  function obBuildReview() {
-    const name    = document.getElementById('ob-name').value.trim();
-    const year    = document.getElementById('ob-year');
-    const branch  = document.getElementById('ob-branch');
-    const sem     = document.getElementById('ob-sem').value;
-    const acyear  = document.getElementById('ob-acyear').value;
-    const start   = document.getElementById('ob-sem-start').value;
-    const end     = document.getElementById('ob-sem-end').value;
-
-    const rows = [
-      ['Name',       name || '—'],
-      ['Year',       year?.options?.[year.selectedIndex]?.text || '—'],
-      ['Branch',     branch?.value || '—'],
-      ['Semester',   sem + ' Semester ' + acyear],
-      ['Lab Group',  obGrp],
-      ['Dates',      start + ' → ' + end],
-    ];
-
-    const reviewEl = document.getElementById('ob-review');
-    if(reviewEl) {
-      reviewEl.innerHTML = rows.map(([k,v]) =>
-        `<div class="ob-preview-row">
-          <span class="ob-preview-key">${k}</span>
-          <span class="ob-preview-val">${v}</span>
-        </div>`
-      ).join('');
-    }
-  }
-
-  function obFinish() {
-    const name    = document.getElementById('ob-name')?.value.trim();
-    const yearEl  = document.getElementById('ob-year');
-    const branch  = document.getElementById('ob-branch')?.value;
-    const sem     = document.getElementById('ob-sem')?.value;
-    const acyear  = document.getElementById('ob-acyear')?.value;
-    const start   = document.getElementById('ob-sem-start')?.value;
-    const end     = document.getElementById('ob-sem-end')?.value;
-
-    // Save profile
-    const profile = {
-      name, year: yearEl?.value,
-      yearLabel: yearEl?.options?.[yearEl.selectedIndex]?.text || '',
-      branch, labGrp: obGrp,
-      sem, acyear, semStart: start, semEnd: end
-    };
-    localStorage.setItem('iit_profile', JSON.stringify(profile));
-    localStorage.setItem('iit_grp', JSON.stringify(obGrp));
-    localStorage.setItem('iit_onboarded', '1');
-
-    // Fade out and remove overlay
-    const ov = document.getElementById('onboarding-overlay');
-    if(ov) {
-      ov.classList.add('hide');
-      setTimeout(() => {
-        ov.style.display = 'none';
-        if(typeof initAppWithProfile === 'function') initAppWithProfile(profile);
-        else if(typeof renderToday === 'function') renderToday();
-      }, 370);
-    }
-  }
-
-  // Override with real implementations
-  window.obNext = function() {
-    try {
-      if(obStep === 0) {
-        const name = document.getElementById('ob-name').value.trim();
-        if(!name) { document.getElementById('ob-name').focus(); obShake('ob-name'); return; }
-        if(!document.getElementById('ob-year').value) { obShake('ob-year'); return; }
-      }
-      if(obStep < TOTAL_STEPS - 1) {
-        obShowPanel(obStep + 1);
-      } else {
-        obFinish();
-      }
-    } catch(err) {
-      console.error('obNext error:', err);
-      alert('Error: ' + err.message);
-    }
-  };
-
-  window.obBack = function() {
-    if(obStep > 0) obShowPanel(obStep - 1);
-  };
-
-  window.obPickGrp = function(grp, btn) {
-    obGrp = grp;
-    document.querySelectorAll('#ob-grp-chips .ob-chip').forEach(b => b.classList.remove('on'));
-    btn.classList.add('on');
-  };
-
-  // Add shake keyframe
-  const style = document.createElement('style');
-  style.textContent = `@keyframes obShake{0%,100%{transform:translateX(0)}20%,60%{transform:translateX(-6px)}40%,80%{transform:translateX(6px)}}`;
-  document.head.appendChild(style);
-
-  // Allow Enter key to advance
-  document.addEventListener('keydown', function(e) {
-    if(e.key === 'Enter' && document.getElementById('onboarding-overlay').style.display !== 'none') {
-      const overlay = document.getElementById('onboarding-overlay');
-      if(overlay && !overlay.classList.contains('hide') && getComputedStyle(overlay).display !== 'none') {
-        obNext();
-      }
-    }
-  });
-});
-
-</script>
-
-<script>
-
-// ════════════════════════════════
-//  PROFILE — load saved user info
-// ════════════════════════════════
-(function() {
-  const profile = (function(){ try{ return JSON.parse(localStorage.getItem('iit_profile')); } catch(e){ return null; } })();
-  if(!profile) return;
-
-  // Patch labGrp from profile
-  if(profile.labGrp && typeof labGrp !== 'undefined') labGrp = profile.labGrp;
-
-  // Patch greetMsg to include name
-  const _origGreet = window.greetMsg || greetMsg;
-  window.greetMsg = function() {
-    const base = _origGreet();
-    return profile.name ? base + ', ' + profile.name.split(' ')[0] + '!' : base;
-  };
-
-  // Patch renderToday to use dynamic semester label and dates
-  const semLabel = (profile.sem || 'Even') + ' Semester ' + (profile.acyear || '2025-26');
-  const semStartStr = profile.semStart || '2026-01-05';
-  const semEndStr   = profile.semEnd   || '2026-05-02';
-
-  // Override greet-sub semester text and sem prog dates
-  const _origRenderToday = window.renderToday || renderToday;
-  window.renderToday = function() {
-    _origRenderToday();
-    // Update greet-sub to use profile semester
-    const gs = document.getElementById('greet-sub');
-    if(gs) {
-      gs.textContent = gs.textContent.replace(/Even Semester 2026|Odd Semester \d+|Even Semester \d+/, semLabel);
-    }
-    // Update nav semester label
-    const navSem = document.querySelector('.nav-right span');
-    if(navSem && navSem.textContent.includes('Semester')) navSem.textContent = semLabel;
-    // Recompute sem progress with profile dates
-    const semStart = new Date(semStartStr);
-    const semEnd   = new Date(semEndStr);
-    const elapsed  = Math.max(0, now - semStart);
-    const total    = semEnd - semStart;
-    const pct      = Math.min(100, Math.round(elapsed / total * 100));
-    const weeksLeft = Math.max(0, Math.ceil((semEnd - now) / (1000*60*60*24*7)));
-    const sp = document.getElementById('sem-prog');
-    if(sp) {
-      sp.innerHTML = `
-        <div class="small muted mb8">${semLabel}</div>
-        <div class="sem-bar-wrap"><div class="sem-bar-fill" style="width:${pct}%"></div></div>
-        <div class="between mt8">
-          <div class="small muted">${semStartStr.slice(5).replace('-','/')}</div>
-          <div class="small bold" style="color:var(--accent2)">${pct}% complete</div>
-          <div class="small muted">${semEndStr.slice(5).replace('-','/')}</div>
-        </div>
-        <div class="row mt12" style="gap:16px">
-          <div><div class="small muted">Weeks left</div><div class="bold mono" style="font-size:1.2rem;color:var(--accent2)">${weeksLeft}</div></div>
-          <div><div class="small muted">End Sem starts</div><div class="bold" style="color:var(--warn)">${semEndStr.slice(5,10)}</div></div>
-        </div>`;
-    }
-  };
-
-  // Expose helper for onboarding finish callback
-  window.initAppWithProfile = function(p) {
-    if(p.labGrp) labGrp = p.labGrp;
-    if(typeof renderToday === 'function') renderToday();
-    if(typeof renderSettings === 'function') renderSettings();
-  };
-
-  // Patch settings page to show a profile card + reset onboarding link
-  const _origRenderSettings = window.renderSettings || renderSettings;
-  window.renderSettings = function() {
-    _origRenderSettings();
-    // Inject profile card at top of settings if not already there
-    const settingsPage = document.getElementById('page-settings');
-    if(settingsPage && !document.getElementById('profile-settings-card')) {
-      const card = document.createElement('div');
-      card.id = 'profile-settings-card';
-      card.className = 'card mb16';
-      card.innerHTML = `
-        <div class="between mb12">
-          <div class="bold" style="font-size:.92rem">👤 Your Profile</div>
-          <button class="btn btn-g btn-sm" onclick="resetOnboarding()">✏️ Edit Profile</button>
-        </div>
-        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px">
-          <div class="card2" style="text-align:center">
-            <div class="small muted mb4">Name</div>
-            <div style="font-weight:700;font-size:.88rem;color:var(--accent2)">${p.name||'—'}</div>
-          </div>
-          <div class="card2" style="text-align:center">
-            <div class="small muted mb4">Year / Branch</div>
-            <div style="font-weight:700;font-size:.88rem">${p.yearLabel||p.year||'—'} · ${p.branch||'—'}</div>
-          </div>
-          <div class="card2" style="text-align:center">
-            <div class="small muted mb4">Lab Group</div>
-            <div style="font-weight:700;font-size:.88rem;color:var(--accent2)">${p.labGrp||labGrp}</div>
-          </div>
-        </div>
-      `;
-      settingsPage.insertBefore(card, settingsPage.firstChild);
-    }
-    // Also patch worker URL/secret fields in settings if they exist
-    const proxyInput = document.getElementById('settings-proxy');
-    const secretInput = document.getElementById('settings-secret');
-    if(proxyInput) proxyInput.value = (function(){ try{ return JSON.parse(localStorage.getItem('iit_proxy_url'))||''; } catch(e){ return ''; } })();
-    if(secretInput) secretInput.value = (function(){ try{ return JSON.parse(localStorage.getItem('iit_worker_secret'))||''; } catch(e){ return ''; } })();
-  };
-})();
-
-function resetOnboarding() {
-  if(!confirm('Re-run the setup wizard? Your courses, assignments and exams will be kept.')) return;
-  localStorage.removeItem('iit_onboarded');
-  localStorage.removeItem('iit_profile');
-  location.reload();
-}
-
-</script>
-
-<!-- Toast -->
-<div class="save-toast" id="toast"></div>
-
-<!-- PWA Install Banner -->
-<div id="pwa-banner" style="display:none;position:fixed;bottom:20px;right:20px;background:#1e2535;border:1px solid rgba(37,99,235,.4);border-radius:12px;padding:14px 16px;z-index:300;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
-  <div style="font-size:.85rem;font-weight:700;margin-bottom:4px">📲 Install as App</div>
-  <div style="font-size:.72rem;color:#5a7099;margin-bottom:10px">Add to home screen or desktop for quick access</div>
-  <div style="display:flex;gap:6px">
-    <button onclick="installPWA()" style="flex:1;background:#2563eb;color:#fff;border:none;border-radius:7px;padding:7px;font-size:.78rem;font-weight:600;cursor:pointer">Install</button>
-    <button onclick="document.getElementById('pwa-banner').style.display='none'" style="background:transparent;color:#5a7099;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;font-size:.78rem;cursor:pointer">Later</button>
-  </div>
-</div>
 
 <script>
 // ── PWA Service Worker + Install ──
@@ -3397,115 +4364,5 @@ window.addEventListener('appinstalled', () => {
   deferredPrompt = null;
 });
 </script>
-
-<!-- ══ ONBOARDING OVERLAY ══ -->
-<div id="onboarding-overlay">
-  <div class="ob-card">
-
-    <div class="ob-logo">🎓</div>
-    <div class="ob-title">Welcome to IIT Mandi Tracker</div>
-    <div class="ob-sub">Let's set up your personal academic dashboard. This takes about 30 seconds.</div>
-
-    <!-- Step indicators -->
-    <div class="ob-steps">
-      <div class="ob-step active" id="ob-s0"></div>
-      <div class="ob-step" id="ob-s1"></div>
-      <div class="ob-step" id="ob-s2"></div>
-    </div>
-
-    <!-- ── Step 0: Personal Info ── -->
-    <div class="ob-panel active" id="ob-panel-0">
-      <div class="ob-section-label">👤 About You</div>
-      <div class="ob-fg">
-        <label>Your Name</label>
-        <input class="ob-inp" id="ob-name" placeholder="e.g. Krish Sharma" autocomplete="off">
-      </div>
-      <div class="ob-row2">
-        <div>
-          <label class="ob-fg" style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em">College Year</label>
-          <select class="ob-sel" id="ob-year">
-            <option value="">Select year…</option>
-            <option value="1">1st Year</option>
-            <option value="2">2nd Year</option>
-            <option value="3">3rd Year</option>
-            <option value="4">4th Year</option>
-            <option value="5">5th Year (Dual)</option>
-          </select>
-        </div>
-        <div>
-          <label class="ob-fg" style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em">Branch</label>
-          <select class="ob-sel" id="ob-branch">
-            <option value="">Select branch…</option>
-            <option value="CSE">Computer Science (CSE)</option>
-            <option value="ECE">Electronics (ECE)</option>
-            <option value="EE">Electrical (EE)</option>
-            <option value="ME">Mechanical (ME)</option>
-            <option value="CE">Civil (CE)</option>
-            <option value="DS">Data Science</option>
-            <option value="BioTech">Biotechnology</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Step 1: Semester Info ── -->
-    <div class="ob-panel" id="ob-panel-1">
-      <div class="ob-section-label">📅 Semester Details</div>
-      <div class="ob-row2">
-        <div>
-          <label class="ob-fg" style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em">Current Semester</label>
-          <select class="ob-sel" id="ob-sem">
-            <option value="Odd">Odd Semester</option>
-            <option value="Even" selected>Even Semester</option>
-          </select>
-        </div>
-        <div>
-          <label class="ob-fg" style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em">Academic Year</label>
-          <select class="ob-sel" id="ob-acyear">
-            <option value="2025-26" selected>2025–26</option>
-            <option value="2026-27">2026–27</option>
-            <option value="2024-25">2024–25</option>
-          </select>
-        </div>
-      </div>
-      <div class="ob-row2">
-        <div>
-          <label class="ob-fg" style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em">Semester Start</label>
-          <input class="ob-inp" id="ob-sem-start" type="date" value="2026-01-05">
-        </div>
-        <div>
-          <label class="ob-fg" style="font-size:.72rem;color:var(--muted);font-weight:600;margin-bottom:5px;display:block;text-transform:uppercase;letter-spacing:.04em">Semester End</label>
-          <input class="ob-inp" id="ob-sem-end" type="date" value="2026-05-02">
-        </div>
-      </div>
-      <div class="ob-fg">
-        <label>Lab Group</label>
-        <div class="ob-chip-group" id="ob-grp-chips">
-          <button class="ob-chip on" onclick="obPickGrp('G1',this)">G1</button>
-          <button class="ob-chip" onclick="obPickGrp('G2',this)">G2</button>
-          <button class="ob-chip" onclick="obPickGrp('G3',this)">G3</button>
-          <button class="ob-chip" onclick="obPickGrp('G4',this)">G4</button>
-          <button class="ob-chip" onclick="obPickGrp('G5',this)">G5</button>
-        </div>
-      </div>
-    </div>
-
-    <!-- ── Step 2: Review & Launch ── -->
-    <div class="ob-panel" id="ob-panel-2">
-      <div class="ob-section-label">✅ Review & Launch</div>
-      <p style="font-size:.8rem;color:var(--muted);margin-bottom:14px">Everything looks good! You can always change these in Settings.</p>
-      <div class="ob-preview" id="ob-review"></div>
-    </div>
-
-    <!-- Bottom nav -->
-    <div class="ob-nav">
-      <button class="ob-btn ob-btn-g" id="ob-back-btn" onclick="obBack()" style="display:none">← Back</button>
-      <button class="ob-btn ob-btn-p ob-btn-big" id="ob-next-btn" onclick="obNext()">Continue →</button>
-    </div>
-
-  </div>
-</div>
-
 </body>
 </html>
