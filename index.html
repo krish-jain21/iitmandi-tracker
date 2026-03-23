@@ -2,8 +2,49 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>IIT Mandi — Academic Tracker</title>
+
+<!-- PWA Meta -->
+<meta name="application-name" content="IIT Mandi Tracker">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IIT Mandi">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#070c18">
+<meta name="msapplication-TileColor" content="#070c18">
+<meta name="description" content="Personal academic tracker for IIT Mandi — timetable, assignments, exams, habits">
+
+<!-- PWA Manifest (inline via JS blob — works on GitHub Pages without extra files) -->
+<script>
+(function(){
+  const manifest = {
+    name: "IIT Mandi Academic Tracker",
+    short_name: "IIT Mandi",
+    description: "Timetable, assignments, exams & habits tracker",
+    start_url: "./",
+    display: "standalone",
+    background_color: "#070c18",
+    theme_color: "#2563eb",
+    orientation: "any",
+    icons: [
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 192 192'%3E%3Crect width='192' height='192' rx='32' fill='%232563eb'/%3E%3Ctext x='96' y='130' font-size='100' text-anchor='middle' fill='white'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E", sizes:"192x192", type:"image/svg+xml" },
+      { src: "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'%3E%3Crect width='512' height='512' rx='80' fill='%232563eb'/%3E%3Ctext x='256' y='360' font-size='280' text-anchor='middle' fill='white'%3E%F0%9F%8E%93%3C/text%3E%3C/svg%3E", sizes:"512x512", type:"image/svg+xml" }
+    ],
+    shortcuts: [
+      { name:"Today", short_name:"Today", url:"./#today", description:"View today's schedule" },
+      { name:"Assignments", short_name:"Tasks", url:"./#asgn", description:"View assignments" },
+      { name:"Exams", short_name:"Exams", url:"./#exams", description:"View exam schedule" }
+    ]
+  };
+  const blob = new Blob([JSON.stringify(manifest)], {type:'application/json'});
+  const url  = URL.createObjectURL(blob);
+  const link = document.createElement('link');
+  link.rel = 'manifest'; link.href = url;
+  document.currentScript.after(link);
+})();
+</script>
+
 <link href="https://fonts.googleapis.com/css2?family=Sora:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
 <style>
@@ -259,6 +300,52 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
 @keyframes spin{to{transform:rotate(360deg)}}
 .import-course-row{display:flex;align-items:center;gap:8px;padding:7px 10px;background:var(--s2);border-radius:7px;margin-bottom:5px;font-size:.8rem}
 .import-event-row{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--s2);border-radius:7px;margin-bottom:5px;font-size:.78rem}
+
+/* ── MOODLE ── */
+.m-course-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px;transition:border-color .15s;cursor:pointer}
+.m-course-card:hover{border-color:var(--border2)}
+.m-course-title{font-size:.9rem;font-weight:700;margin-bottom:3px}
+.m-course-meta{font-size:.7rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.m-section{margin-bottom:16px}
+.m-section-title{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--accent2);margin-bottom:8px;padding-bottom:4px;border-bottom:1px solid var(--border)}
+.m-file-item{display:flex;align-items:center;gap:10px;padding:8px 12px;background:var(--s2);border-radius:7px;margin-bottom:5px;font-size:.82rem}
+.m-file-icon{font-size:1.1rem;flex-shrink:0}
+.m-file-name{flex:1;font-weight:500}
+.m-file-size{font-size:.65rem;color:var(--muted);font-family:'JetBrains Mono',monospace}
+.m-asgn-card{background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:12px 14px;margin-bottom:7px}
+.m-asgn-title{font-size:.88rem;font-weight:600;margin-bottom:5px}
+.m-ann-card{background:var(--s1);border:1px solid var(--border);border-radius:9px;padding:14px 16px;margin-bottom:8px}
+.m-ann-title{font-size:.88rem;font-weight:700;margin-bottom:4px}
+.m-ann-body{font-size:.78rem;color:var(--muted);line-height:1.6;max-height:80px;overflow:hidden;text-overflow:ellipsis}
+.m-spinner{display:inline-block;width:16px;height:16px;border:2px solid rgba(255,255,255,.2);border-top-color:var(--accent2);border-radius:50%;animation:spin .7s linear infinite;vertical-align:middle;margin-right:6px}
+.m-empty{text-align:center;padding:40px 20px;color:var(--muted);font-size:.85rem}
+.gap8{gap:8px}
+
+/* ── ATTENDANCE ── */
+.att-course-card{background:var(--s1);border:1px solid var(--border);border-radius:10px;padding:14px 16px;margin-bottom:8px}
+.att-course-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.att-bar-wrap{background:var(--s3);border-radius:4px;height:8px;overflow:hidden;margin:6px 0 4px}
+.att-bar{height:100%;border-radius:4px;transition:width .5s}
+.att-bar.safe{background:#22c55e}
+.att-bar.warn{background:#f59e0b}
+.att-bar.danger{background:#ef4444}
+.att-stats{display:flex;gap:16px;margin-top:8px}
+.att-stat{text-align:center}
+.att-stat .val{font-size:1.1rem;font-weight:800;font-family:'JetBrains Mono',monospace}
+.att-stat .lbl{font-size:.62rem;color:var(--muted);text-transform:uppercase;letter-spacing:.05em}
+.att-log-row{display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid var(--border);font-size:.8rem}
+.att-log-row:last-child{border-bottom:none}
+.att-status-btn{padding:4px 12px;border-radius:6px;border:none;font-size:.72rem;font-weight:700;cursor:pointer;transition:all .12s}
+.att-p{background:rgba(34,197,94,.15);color:#4ade80}
+.att-p.active{background:#22c55e;color:#fff}
+.att-a{background:rgba(239,68,68,.15);color:#f87171}
+.att-a.active{background:#ef4444;color:#fff}
+.att-l{background:rgba(245,158,11,.15);color:#fbbf24}
+.att-l.active{background:#f59e0b;color:#fff}
+.att-c{background:rgba(99,102,241,.15);color:#a5b4fc}
+.att-c.active{background:#6366f1;color:#fff}
+.att-warning{background:rgba(239,68,68,.08);border:1px solid rgba(239,68,68,.2);border-radius:8px;padding:8px 12px;font-size:.78rem;color:#f87171;margin-top:8px}
+.att-ok{background:rgba(34,197,94,.08);border:1px solid rgba(34,197,94,.2);border-radius:8px;padding:8px 12px;font-size:.78rem;color:#4ade80;margin-top:8px}
 </style>
 </head>
 <body>
@@ -273,6 +360,8 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
     <button class="tab" onclick="go('asgn',this)">📝 Assignments</button>
     <button class="tab" onclick="go('exams',this)">🎯 Exams</button>
     <button class="tab" onclick="go('habits',this)">✅ Habits</button>
+    <button class="tab" onclick="go('attend',this)">📊 Attendance</button>
+    <button class="tab" onclick="go('moodle',this)">🎓 Moodle</button>
     <button class="tab" onclick="go('settings',this)">⚙️ Settings</button>
   </div>
   <div class="nav-right">
@@ -463,6 +552,126 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
   </div>
 </div>
 
+<!-- ══ ATTENDANCE ══ -->
+<div class="page" id="page-attend">
+  <div class="between mb16">
+    <div>
+      <div class="bold" style="font-size:1.1rem">📊 Attendance Tracker</div>
+      <div class="small muted">IIT Mandi requires 75% attendance to sit for end-sem exams</div>
+    </div>
+    <div class="row" style="gap:8px">
+      <select class="sel" id="att-week-sel" onchange="renderAttendLog()" style="font-size:.78rem;padding:6px 10px"></select>
+      <button class="btn btn-p btn-sm" onclick="attMarkToday()">✏️ Mark Today</button>
+    </div>
+  </div>
+
+  <!-- Summary cards -->
+  <div id="att-summary" class="g3 mb16"></div>
+
+  <!-- Per-course cards -->
+  <div class="bold mb8" style="font-size:.92rem">Course-wise Breakdown</div>
+  <div id="att-courses"></div>
+
+  <!-- Log section -->
+  <div class="between mb8 mt16">
+    <div class="bold" style="font-size:.92rem">Attendance Log</div>
+    <div class="row" style="gap:6px">
+      <select class="sel" id="att-log-course" onchange="renderAttendLog()" style="font-size:.78rem;padding:6px 10px">
+        <option value="all">All Courses</option>
+      </select>
+    </div>
+  </div>
+  <div id="att-log"></div>
+</div>
+
+<!-- ══ MOODLE ══ -->
+<div class="page" id="page-moodle">
+  <!-- Token setup card -->
+  <div class="card mb16" id="moodle-setup-card">
+    <div class="between mb4">
+      <div class="bold" style="font-size:.92rem">🎓 Moodle LMS — IIT Mandi</div>
+      <span class="badge b-blue">lms.iitmandi.ac.in</span>
+    </div>
+    <div class="small muted mb14">Connect your Moodle account to pull course materials, assignments and announcements. Works on campus WiFi / VPN only.</div>
+
+    <div class="card2 mb12" style="background:rgba(245,158,11,.06);border-color:rgba(245,158,11,.2)">
+      <div class="small" style="color:#fbbf24;font-weight:600;margin-bottom:4px">⚠️ Campus WiFi / VPN Required</div>
+      <div class="small muted">This feature only works when connected to IIT Mandi campus network. Data is cached locally after sync.</div>
+    </div>
+
+    <div class="bold small mb8" style="text-transform:uppercase;letter-spacing:.06em;color:var(--muted)">How to get your token</div>
+    <div style="display:flex;flex-direction:column;gap:6px;margin-bottom:14px">
+      <div class="row" style="gap:8px;align-items:flex-start">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0">1</div>
+        <div class="small">Open <span class="mono" style="color:var(--accent2)">lms.iitmandi.ac.in</span> and log in</div>
+      </div>
+      <div class="row" style="gap:8px;align-items:flex-start">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0">2</div>
+        <div class="small">Click your profile picture (top right) → <strong>Preferences</strong></div>
+      </div>
+      <div class="row" style="gap:8px;align-items:flex-start">
+        <div style="width:20px;height:20px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:.65rem;font-weight:700;flex-shrink:0">3</div>
+        <div class="small">Under Security → <strong>Security keys</strong> → copy your token</div>
+      </div>
+    </div>
+
+    <div class="fg2">
+      <div>
+        <label class="lbl">Your Moodle Token</label>
+        <input class="inp" id="moodle-token" type="password" placeholder="Paste token here…">
+      </div>
+      <div>
+        <label class="lbl">Moodle URL</label>
+        <input class="inp" id="moodle-url" value="https://lms.iitmandi.ac.in">
+      </div>
+    </div>
+    <div class="row mt8" style="gap:8px">
+      <button class="btn btn-p" onclick="moodleConnect()">🔗 Connect & Sync</button>
+      <button class="btn btn-g" onclick="moodleSync()" id="moodle-resync-btn" style="display:none">🔄 Re-sync</button>
+      <button class="btn btn-d btn-sm" onclick="moodleDisconnect()" id="moodle-disconnect-btn" style="display:none">Disconnect</button>
+      <div id="moodle-status" class="small muted"></div>
+    </div>
+  </div>
+
+  <!-- Connected user info -->
+  <div id="moodle-user-card" style="display:none" class="card mb16">
+    <div class="between">
+      <div class="row gap8">
+        <div style="width:38px;height:38px;border-radius:50%;background:var(--accent);display:flex;align-items:center;justify-content:center;font-size:1.1rem">🎓</div>
+        <div>
+          <div class="bold" id="moodle-username"></div>
+          <div class="small muted" id="moodle-useremail"></div>
+        </div>
+      </div>
+      <div class="small muted" id="moodle-lastsynced"></div>
+    </div>
+  </div>
+
+  <!-- Tabs within Moodle page -->
+  <div class="row mb16" id="moodle-tabs" style="display:none;gap:4px">
+    <button class="chip on" id="mtab-courses" onclick="moodleTab('courses',this)">📚 Courses</button>
+    <button class="chip" id="mtab-files" onclick="moodleTab('files',this)">📁 Materials</button>
+    <button class="chip" id="mtab-assignments" onclick="moodleTab('assignments',this)">📝 Assignments</button>
+    <button class="chip" id="mtab-announcements" onclick="moodleTab('announcements',this)">📢 Announcements</button>
+  </div>
+
+  <!-- Moodle content area -->
+  <div id="moodle-courses-view">
+    <div id="moodle-courses-list"></div>
+  </div>
+  <div id="moodle-files-view" style="display:none">
+    <div class="small muted mb12">Select a course to browse its materials</div>
+    <select class="sel mb12" id="moodle-course-picker" onchange="loadCourseFiles(this.value)" style="width:100%;max-width:400px"></select>
+    <div id="moodle-files-list"></div>
+  </div>
+  <div id="moodle-assignments-view" style="display:none">
+    <div id="moodle-assignments-list"></div>
+  </div>
+  <div id="moodle-announcements-view" style="display:none">
+    <div id="moodle-announcements-list"></div>
+  </div>
+</div>
+
 </div><!-- scroll -->
 </div><!-- app -->
 
@@ -579,12 +788,44 @@ body{font-family:'Sora',sans-serif;background:var(--bg);color:var(--text);font-s
   </div>
 </div>
 
+<!-- Mark Attendance Modal -->
+<div class="overlay" id="modal-attend">
+  <div class="modal" style="max-width:480px">
+    <div class="modal-title">✏️ Mark Attendance</div>
+    <div class="fg2">
+      <div><label class="lbl">Date</label><input class="inp" id="att-date" type="date"></div>
+      <div><label class="lbl">Course</label>
+        <select class="sel" id="att-course-sel" style="width:100%"></select>
+      </div>
+    </div>
+    <div class="fg">
+      <label class="lbl">Status</label>
+      <div class="row" style="gap:8px;flex-wrap:wrap">
+        <button class="att-status-btn att-p active" id="att-btn-P" onclick="selectAttStatus('P')">✓ Present</button>
+        <button class="att-status-btn att-a" id="att-btn-A" onclick="selectAttStatus('A')">✗ Absent</button>
+        <button class="att-status-btn att-l" id="att-btn-L" onclick="selectAttStatus('L')">⏰ Late</button>
+        <button class="att-status-btn att-c" id="att-btn-C" onclick="selectAttStatus('C')">📋 Cancelled</button>
+      </div>
+    </div>
+    <div class="fg"><label class="lbl">Note (optional)</label>
+      <input class="inp" id="att-note" placeholder="e.g. Sick, lab practical, etc.">
+    </div>
+    <div class="modal-actions">
+      <button class="btn btn-g" onclick="closeModal('attend')">Cancel</button>
+      <button class="btn btn-p" onclick="saveAttendance()">Save</button>
+    </div>
+  </div>
+</div>
+
 <script>
 // ════════════════════════════════
 //  CORE UTILS (must be first)
 // ════════════════════════════════
 const load = k => { try { return JSON.parse(localStorage.getItem(k)) } catch { return null } };
 const save = (k,v) => localStorage.setItem(k, JSON.stringify(v));
+
+// Cloudflare Worker proxy URL — update this after deploying your worker
+const PROXY_URL = load('iit_proxy_url') || 'https://iitmandi-proxy.krish210005.workers.dev';
 
 // ════════════════════════════════
 //  DATA
@@ -733,6 +974,7 @@ function go(id,btn) {
   if(id==='exams') renderExams();
   if(id==='asgn') renderAsgns();
   if(id==='settings') renderSettings();
+  if(id==='moodle') { renderMoodlePage(); }
 }
 
 // ════════════════════════════════
@@ -1498,7 +1740,7 @@ Rules:
       `}
     ];
 
-    const pass1Res = await fetch('https://api.anthropic.com/v1/messages', {
+    const pass1Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:4000, messages:[{role:'user', content:pass1Content}] })
     });
@@ -1570,7 +1812,7 @@ RULES:
       `}
     ];
 
-    const pass2Res = await fetch('https://api.anthropic.com/v1/messages', {
+    const pass2Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({ model:'claude-sonnet-4-20250514', max_tokens:6000, messages:[{role:'user', content:pass2Content}] })
     });
@@ -1596,7 +1838,7 @@ RULES:
 
 function setParseStatus(msg, type) {
   const el = document.getElementById('parse-status');
-  el.textContent = msg;
+  el.innerHTML = msg;
   el.style.color = type==='ok' ? 'var(--success)' : type==='warn' ? '#fbbf24' : type==='err' ? '#f87171' : 'var(--muted)';
 }
 
@@ -1706,8 +1948,450 @@ function cancelImport() {
 }
 
 // ════════════════════════════════
-//  CONFLICT RESOLVER
+//  ATTENDANCE TRACKER
 // ════════════════════════════════
+let attLog = load('iit_att') || {};
+let attSelStatus = 'P';
+const MIN_ATT = 75;
+
+function attCourses() {
+  return COURSES.filter(c => c.slot !== 'LAB' && c.slot !== '' && c.slot !== 'NS');
+}
+
+function attStats(code) {
+  const log = attLog[code] || {};
+  const entries = Object.values(log);
+  const total   = entries.filter(e => e.status !== 'C').length;
+  const present = entries.filter(e => e.status === 'P' || e.status === 'L').length;
+  const absent  = entries.filter(e => e.status === 'A').length;
+  const pct     = total ? Math.round(present / total * 100) : 100;
+  const canBunk = Math.max(0, Math.floor(present / (MIN_ATT/100)) - total);
+  const needed  = pct >= MIN_ATT ? 0 : Math.ceil((MIN_ATT/100 * total - present) / (1 - MIN_ATT/100));
+  return { total, present, absent, pct, canBunk, needed };
+}
+
+function renderAttend() {
+  const weekSel = document.getElementById('att-week-sel');
+  const semStart = new Date('2026-01-05');
+  const semEnd   = new Date('2026-04-24');
+  const weeks = [];
+  let d = new Date(semStart);
+  while(d <= semEnd) {
+    const we = new Date(d); we.setDate(we.getDate()+6);
+    weeks.push({ start: dk(d), end: dk(we), label: `Week of ${d.getDate()} ${MONTHS[d.getMonth()]}` });
+    d.setDate(d.getDate()+7);
+  }
+  if(!weekSel.innerHTML) {
+    weekSel.innerHTML = weeks.map(w=>`<option value="${w.start}" ${w.start<=TODAY&&w.end>=TODAY?'selected':''}>${w.label}</option>`).join('');
+  }
+
+  const courses = attCourses();
+  const overall = (() => {
+    let tot=0,pre=0;
+    courses.forEach(c=>{ const s=attStats(c.code); tot+=s.total; pre+=s.present; });
+    return tot ? Math.round(pre/tot*100) : 100;
+  })();
+  const danger = courses.filter(c=>attStats(c.code).pct < MIN_ATT).length;
+  const warn   = courses.filter(c=>{ const s=attStats(c.code); return s.pct>=MIN_ATT && s.pct<80; }).length;
+
+  document.getElementById('att-summary').innerHTML = `
+    <div class="card" style="text-align:center">
+      <div class="small muted mb4">Overall Attendance</div>
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${overall>=75?'#4ade80':overall>=60?'#fbbf24':'#f87171'}">${overall}%</div>
+      <div class="small muted">across ${courses.length} courses</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="small muted mb4">⚠️ Below 75%</div>
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${danger?'#f87171':'#4ade80'}">${danger}</div>
+      <div class="small muted">courses at risk</div>
+    </div>
+    <div class="card" style="text-align:center">
+      <div class="small muted mb4">🟡 Warning Zone</div>
+      <div style="font-size:2rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${warn?'#fbbf24':'#4ade80'}">${warn}</div>
+      <div class="small muted">courses 75–80%</div>
+    </div>`;
+
+  document.getElementById('att-courses').innerHTML = courses.map(c=>{
+    const s = attStats(c.code);
+    const barCls = s.pct>=80?'safe':s.pct>=75?'warn':'danger';
+    return `<div class="att-course-card">
+      <div class="att-course-header">
+        <div class="row" style="gap:8px">
+          <div style="width:10px;height:10px;border-radius:50%;background:${c.color}"></div>
+          <div class="bold" style="font-size:.88rem">${c.short}</div>
+          <div class="small muted mono">${c.code}</div>
+        </div>
+        <div style="font-size:1.3rem;font-weight:800;font-family:'JetBrains Mono',monospace;color:${s.pct>=75?'#4ade80':s.pct>=60?'#fbbf24':'#f87171'}">${s.pct}%</div>
+      </div>
+      <div class="att-bar-wrap"><div class="att-bar ${barCls}" style="width:${Math.min(s.pct,100)}%"></div></div>
+      <div class="att-stats">
+        <div class="att-stat"><div class="val" style="color:#4ade80">${s.present}</div><div class="lbl">Present</div></div>
+        <div class="att-stat"><div class="val" style="color:#f87171">${s.absent}</div><div class="lbl">Absent</div></div>
+        <div class="att-stat"><div class="val">${s.total}</div><div class="lbl">Total</div></div>
+      </div>
+      ${s.pct < MIN_ATT
+        ? `<div class="att-warning">⚠️ Attend next <strong>${s.needed}</strong> class${s.needed!==1?'es':''} consecutively to reach 75%</div>`
+        : s.canBunk>0
+          ? `<div class="att-ok">✓ You can miss <strong>${s.canBunk}</strong> more class${s.canBunk!==1?'es':''} and stay above 75%</div>`
+          : `<div class="att-warning">⚠️ Cannot miss any more — right at 75%</div>`
+      }
+    </div>`;
+  }).join('');
+
+  // Log course filter
+  const logSel = document.getElementById('att-log-course');
+  const prev = logSel.value;
+  logSel.innerHTML = '<option value="all">All Courses</option>' +
+    courses.map(c=>`<option value="${c.code}" ${prev===c.code?'selected':''}>${c.code} — ${c.short}</option>`).join('');
+  renderAttendLog();
+}
+
+function renderAttendLog() {
+  const filterCourse = document.getElementById('att-log-course')?.value || 'all';
+  const filterWeek   = document.getElementById('att-week-sel')?.value || TODAY;
+  const weekEnd      = (() => { const d=dateObj(filterWeek); d.setDate(d.getDate()+6); return dk(d); })();
+  const courses = filterCourse==='all' ? attCourses() : attCourses().filter(c=>c.code===filterCourse);
+  const entries = [];
+  courses.forEach(c => {
+    Object.entries(attLog[c.code]||{}).forEach(([date,v]) => {
+      if(date >= filterWeek && date <= weekEnd) entries.push({...v, date, courseCode:c.code, color:c.color, short:c.short});
+    });
+  });
+  entries.sort((a,b)=>b.date.localeCompare(a.date));
+  const statusLabel = {P:'✓ Present', A:'✗ Absent', L:'⏰ Late', C:'📋 Cancelled'};
+  const statusColor = {P:'#4ade80', A:'#f87171', L:'#fbbf24', C:'#818cf8'};
+  document.getElementById('att-log').innerHTML = entries.length
+    ? entries.map(e=>`<div class="att-log-row">
+        <div style="min-width:80px;font-family:'JetBrains Mono',monospace;font-size:.7rem;color:var(--muted)">${fmtDate(e.date)}</div>
+        <div style="width:8px;height:8px;border-radius:50%;background:${e.color};flex-shrink:0"></div>
+        <div style="flex:1;font-size:.82rem;font-weight:500">${e.short}</div>
+        <div style="font-size:.75rem;font-weight:700;color:${statusColor[e.status]}">${statusLabel[e.status]}</div>
+        ${e.note?`<div class="small muted">${e.note}</div>`:''}
+        <button class="ibtn del" onclick="delAttEntry('${e.courseCode}','${e.date}')">🗑</button>
+      </div>`).join('')
+    : '<div class="muted small" style="padding:20px 0;text-align:center">No records this week.</div>';
+}
+
+function attMarkToday() {
+  const courses = attCourses();
+  document.getElementById('att-course-sel').innerHTML =
+    courses.map(c=>`<option value="${c.code}">${c.code} — ${c.short}</option>`).join('');
+  document.getElementById('att-date').value = TODAY;
+  document.getElementById('att-note').value = '';
+  selectAttStatus('P');
+  document.getElementById('modal-attend').classList.add('on');
+}
+
+function selectAttStatus(s) {
+  attSelStatus = s;
+  ['P','A','L','C'].forEach(x => {
+    document.getElementById(`att-btn-${x}`)?.classList.toggle('active', x===s);
+  });
+}
+
+function saveAttendance() {
+  const date = document.getElementById('att-date').value;
+  const code = document.getElementById('att-course-sel').value;
+  const note = document.getElementById('att-note').value.trim();
+  if(!date||!code) return;
+  if(!attLog[code]) attLog[code] = {};
+  attLog[code][date] = { status: attSelStatus, note };
+  save('iit_att', attLog);
+  closeModal('attend');
+  renderAttend();
+  showToast('Attendance saved ✓');
+}
+
+function delAttEntry(code, date) {
+  if(!attLog[code]) return;
+  delete attLog[code][date];
+  save('iit_att', attLog);
+  renderAttend();
+}
+
+// ════════════════════════════════
+//  MOODLE INTEGRATION
+// ════════════════════════════════
+let moodleData = {
+  token: load('moodle_token') || '',
+  url:   load('moodle_url')   || 'https://lms.iitmandi.ac.in',
+  user:  load('moodle_user')  || null,
+  courses: load('moodle_courses') || [],
+  assignments: load('moodle_assignments') || [],
+  announcements: load('moodle_announcements') || [],
+  lastSync: load('moodle_lastsync') || null,
+};
+
+function moodleAPI(fn, params={}) {
+  const url = moodleData.url;
+  const token = moodleData.token;
+  // Use POST to avoid URL length limits with many courseids
+  const body = new URLSearchParams({
+    wstoken: token, wsfunction: fn, moodlewsrestformat: 'json', ...params
+  });
+  return fetch(`${url}/webservice/rest/server.php`, { method:'POST', body })
+    .then(r=>r.json())
+    .then(d=>{ if(d && d.exception) throw new Error(d.message||d.exception); return d; });
+}
+
+async function moodleConnect() {
+  const token = document.getElementById('moodle-token').value.trim();
+  const url   = document.getElementById('moodle-url').value.trim().replace(/\/$/,'');
+  if(!token) { setMoodleStatus('⚠️ Please enter your token','warn'); return; }
+  moodleData.token = token;
+  moodleData.url   = url;
+  save('moodle_token', token);
+  save('moodle_url', url);
+  setMoodleStatus('<span class="m-spinner"></span>Connecting…','');
+  try {
+    const info = await moodleAPI('core_webservice_get_site_info');
+    moodleData.user = { name: info.fullname, email: info.useremail||'', userid: info.userid };
+    save('moodle_user', moodleData.user);
+    setMoodleStatus('✓ Connected! Syncing data…','ok');
+    await moodleSync();
+  } catch(err) {
+    setMoodleStatus('❌ '+err.message,'err');
+  }
+}
+
+async function moodleSync() {
+  setMoodleStatus('<span class="m-spinner"></span>Syncing…','');
+  try {
+    // 1. Get enrolled courses
+    const courses = await moodleAPI('core_enrol_get_users_courses', {userid: moodleData.user.userid});
+    moodleData.courses = courses.map(c=>({
+      id:c.id, fullname:c.fullname, shortname:c.shortname,
+      visible:c.visible, progress:c.progress||0,
+    }));
+    save('moodle_courses', moodleData.courses);
+
+    // 2. Get assignments for all courses
+    const courseParams = {};
+    moodleData.courses.forEach((c,i) => { courseParams[`courseids[${i}]`] = c.id; });
+    const assignRes = await moodleAPI('mod_assign_get_assignments', courseParams);
+    const allAsgns = [];
+    (assignRes.courses||[]).forEach(c=>{
+      (c.assignments||[]).forEach(a=>{
+        allAsgns.push({
+          id:a.id, name:a.name, courseid:c.id,
+          coursename: moodleData.courses.find(x=>x.id===c.id)?.shortname||c.fullname,
+          duedate:a.duedate, allowsubmissionsfromdate:a.allowsubmissionsfromdate,
+          intro: a.intro?.replace(/<[^>]*>/g,'')||'',
+          nosubmissions:a.nosubmissions,
+        });
+      });
+    });
+    moodleData.assignments = allAsgns;
+    save('moodle_assignments', allAsgns);
+
+    // 3. Get forum announcements from all courses
+    const forumParams = {};
+    moodleData.courses.forEach((c,i) => { forumParams[`courseids[${i}]`] = c.id; });
+    const forumRes = await moodleAPI('mod_forum_get_forums_by_courses', forumParams);
+    const annForums = (forumRes||[]).filter(f=>f.type==='news'||f.name.toLowerCase().includes('announcement'));
+    const anns = [];
+    for(const f of annForums.slice(0,5)) {
+      try {
+        const posts = await moodleAPI('mod_forum_get_forum_discussions', {forumid:f.id, limitnum:5});
+        (posts.discussions||[]).forEach(d=>{
+          anns.push({
+            id:d.id, subject:d.subject,
+            message:d.message?.replace(/<[^>]*>/g,'')||'',
+            timemodified:d.timemodified,
+            coursename: moodleData.courses.find(c=>c.id===f.course)?.shortname||'',
+          });
+        });
+      } catch(e) {}
+    }
+    moodleData.announcements = anns;
+    save('moodle_announcements', anns);
+
+    // 4. Auto-import assignments into tracker
+    autoImportMoodleAssignments();
+
+    moodleData.lastSync = new Date().toISOString();
+    save('moodle_lastsync', moodleData.lastSync);
+    renderMoodlePage();
+    setMoodleStatus(`✓ Synced ${moodleData.courses.length} courses, ${allAsgns.length} assignments`,'ok');
+    showToast('🎓 Moodle synced!');
+  } catch(err) {
+    setMoodleStatus('❌ '+err.message,'err');
+    renderMoodlePage();
+  }
+}
+
+function autoImportMoodleAssignments() {
+  // Pull Moodle assignments into the tracker assignments list (avoid duplicates)
+  moodleData.assignments.forEach(ma => {
+    const existing = asgns.find(a=>a.moodleId===ma.id);
+    if(existing) return;
+    // Match to a COURSE in our tracker
+    const matchedCourse = COURSES.find(c=>
+      ma.coursename.includes(c.code) || c.name.toLowerCase().includes(ma.coursename.toLowerCase().split(' ')[0])
+    );
+    const due = ma.duedate ? new Date(ma.duedate*1000).toISOString().split('T')[0] : null;
+    asgns.push({
+      id: uid(), moodleId: ma.id,
+      courseCode: matchedCourse?.code || 'MOODLE',
+      title: ma.name,
+      type: 'Assignment',
+      due,
+      priority: due && daysLeft(due)<=7 ? 'H' : 'M',
+      notes: ma.intro ? ma.intro.slice(0,120) : `From Moodle — ${ma.coursename}`,
+      done: false,
+    });
+  });
+  save('iit_asgns', asgns);
+}
+
+function renderMoodlePage() {
+  // Restore token/url inputs
+  if(moodleData.token) document.getElementById('moodle-token').value = moodleData.token;
+  document.getElementById('moodle-url').value = moodleData.url;
+
+  if(moodleData.user) {
+    document.getElementById('moodle-user-card').style.display='block';
+    document.getElementById('moodle-username').textContent = moodleData.user.name;
+    document.getElementById('moodle-useremail').textContent = moodleData.user.email;
+    document.getElementById('moodle-lastsynced').textContent = moodleData.lastSync
+      ? 'Last sync: '+new Date(moodleData.lastSync).toLocaleString('en-GB',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})
+      : '';
+    document.getElementById('moodle-tabs').style.display='flex';
+    document.getElementById('moodle-resync-btn').style.display='inline-flex';
+    document.getElementById('moodle-disconnect-btn').style.display='inline-flex';
+  }
+  renderMoodleCourses();
+  renderMoodleAssignments();
+  renderMoodleAnnouncements();
+  populateMoodleCoursePicker();
+}
+
+function renderMoodleCourses() {
+  const el = document.getElementById('moodle-courses-list');
+  if(!moodleData.courses.length) { el.innerHTML='<div class="m-empty">No courses found. Connect and sync first.</div>'; return; }
+  el.innerHTML = moodleData.courses.map(c=>{
+    const matched = COURSES.find(x=>c.shortname?.includes(x.code)||c.fullname?.toLowerCase().includes(x.code?.toLowerCase()));
+    return `<div class="m-course-card" onclick="moodleTab('files',document.getElementById('mtab-files'));setTimeout(()=>loadCourseFiles(${c.id}),100)">
+      <div class="between">
+        <div>
+          <div class="m-course-title">${c.fullname}</div>
+          <div class="m-course-meta">${c.shortname||''} ${matched?'· <span style="color:'+matched.color+'">'+matched.code+'</span>':''}</div>
+        </div>
+        <div class="row" style="gap:6px">
+          <span class="badge b-blue">📁 Browse</span>
+          ${c.progress?`<span class="badge b-green">${Math.round(c.progress)}%</span>`:''}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+async function loadCourseFiles(courseId) {
+  const el = document.getElementById('moodle-files-list');
+  if(!courseId) return;
+  document.getElementById('moodle-course-picker').value = courseId;
+  el.innerHTML = '<div class="small muted"><span class="m-spinner"></span>Loading materials…</div>';
+  try {
+    const contents = await moodleAPI('core_course_get_contents', {courseid:courseId});
+    if(!contents.length) { el.innerHTML='<div class="m-empty">No materials found for this course.</div>'; return; }
+    let html='';
+    contents.forEach(section=>{
+      if(!section.modules?.length) return;
+      const files = section.modules.filter(m=>m.modname==='resource'||m.modname==='folder'||m.modname==='url'||m.modname==='page');
+      if(!files.length) return;
+      html+=`<div class="m-section">
+        <div class="m-section-title">${section.name||'Section'}</div>
+        ${files.map(m=>{
+          const icon = m.modname==='resource'?'📄':m.modname==='folder'?'📁':m.modname==='url'?'🔗':'📋';
+          const url = m.contents?.[0]?.fileurl||m.url||'#';
+          const size = m.contents?.[0]?.filesize ? `${(m.contents[0].filesize/1024).toFixed(0)} KB` : '';
+          const dl = url!=='#' ? `&token=${moodleData.token}` : '';
+          return `<div class="m-file-item">
+            <span class="m-file-icon">${icon}</span>
+            <div class="m-file-name">${m.name}</div>
+            <span class="m-file-size">${size}</span>
+            ${url!=='#'?`<a href="${url}${dl}" target="_blank" class="btn btn-g btn-sm" style="text-decoration:none">Open</a>`:''}
+          </div>`;
+        }).join('')}
+      </div>`;
+    });
+    el.innerHTML = html || '<div class="m-empty">No downloadable files in this course.</div>';
+  } catch(err) {
+    el.innerHTML = `<div class="m-empty">❌ ${err.message}</div>`;
+  }
+}
+
+function populateMoodleCoursePicker() {
+  const sel = document.getElementById('moodle-course-picker');
+  sel.innerHTML = '<option value="">Select a course…</option>' +
+    moodleData.courses.map(c=>`<option value="${c.id}">${c.shortname||c.fullname}</option>`).join('');
+}
+
+function renderMoodleAssignments() {
+  const el = document.getElementById('moodle-assignments-list');
+  if(!moodleData.assignments.length) { el.innerHTML='<div class="m-empty">No assignments found.</div>'; return; }
+  const sorted = [...moodleData.assignments].sort((a,b)=>(a.duedate||0)-(b.duedate||0));
+  el.innerHTML = sorted.map(a=>{
+    const due = a.duedate ? new Date(a.duedate*1000) : null;
+    const dl  = due ? daysLeft(due.toISOString().split('T')[0]) : null;
+    const dlCls = dl===null?'':dl<0?'d-urg':dl<=3?'d-urg':dl<=7?'d-soon':'d-ok';
+    const dlLabel = dl===null?'No due date':dl<0?`${Math.abs(dl)}d overdue`:dl===0?'Today':dl===1?'Tomorrow':`${dl}d left`;
+    return `<div class="m-asgn-card">
+      <div class="between mb4">
+        <div class="m-asgn-title">${a.name}</div>
+        ${dl!==null?`<span class="ddays ${dlCls}">${dlLabel}</span>`:''}
+      </div>
+      <div class="row" style="gap:6px;flex-wrap:wrap">
+        <span class="badge b-gray">${a.coursename}</span>
+        ${due?`<span class="small muted">📅 ${due.toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric'})}</span>`:''}
+      </div>
+      ${a.intro?`<div class="small muted" style="margin-top:6px;line-height:1.5">${a.intro.slice(0,100)}${a.intro.length>100?'…':''}</div>`:''}
+    </div>`;
+  }).join('');
+}
+
+function renderMoodleAnnouncements() {
+  const el = document.getElementById('moodle-announcements-list');
+  if(!moodleData.announcements.length) { el.innerHTML='<div class="m-empty">No announcements found.</div>'; return; }
+  el.innerHTML = moodleData.announcements.map(a=>{
+    const t = new Date(a.timemodified*1000).toLocaleDateString('en-GB',{day:'2-digit',month:'short'});
+    return `<div class="m-ann-card">
+      <div class="between mb4">
+        <div class="m-ann-title">${a.subject}</div>
+        <div class="small muted mono">${t}</div>
+      </div>
+      <span class="badge b-blue mb8">${a.coursename}</span>
+      <div class="m-ann-body">${a.message}</div>
+    </div>`;
+  }).join('');
+}
+
+function moodleTab(tab, btn) {
+  ['courses','files','assignments','announcements'].forEach(t=>{
+    document.getElementById(`moodle-${t}-view`).style.display = t===tab?'block':'none';
+    document.getElementById(`mtab-${t}`)?.classList.toggle('on', t===tab);
+  });
+}
+
+function setMoodleStatus(msg, type) {
+  const el = document.getElementById('moodle-status');
+  el.innerHTML = msg;
+  el.style.color = type==='ok'?'var(--success)':type==='warn'?'#fbbf24':type==='err'?'#f87171':'var(--muted)';
+}
+
+function moodleDisconnect() {
+  if(!confirm('Disconnect Moodle? Cached data will be cleared.')) return;
+  ['moodle_token','moodle_url','moodle_user','moodle_courses','moodle_assignments','moodle_announcements','moodle_lastsync']
+    .forEach(k=>localStorage.removeItem(k));
+  moodleData = { token:'', url:'https://lms.iitmandi.ac.in', user:null, courses:[], assignments:[], announcements:[], lastSync:null };
+  document.getElementById('moodle-token').value='';
+  document.getElementById('moodle-user-card').style.display='none';
+  document.getElementById('moodle-tabs').style.display='none';
+  document.getElementById('moodle-resync-btn').style.display='none';
+  document.getElementById('moodle-disconnect-btn').style.display='none';
+  setMoodleStatus('Disconnected','');
+  showToast('Moodle disconnected');
+}
 let conflictData = {}; // slot → [courses]
 
 function detectAndResolveConflicts(onDone) {
@@ -1803,7 +2487,10 @@ function resolveConflicts() {
     LAB_SCHED.length=0;
     savedLab.forEach(l=>LAB_SCHED.push([l.courseCode,{Mon:l.Mon||'—',Tue:l.Tue||'—',Wed:l.Wed||'—',Thu:l.Thu||'—',Fri:l.Fri||'—'},l.time||'2:00–5:00 PM']));
   }
-  // Check for conflicts on startup (e.g. after AI import)
+  // Auto-restore Moodle session if previously connected
+  if(moodleData.user) { renderMoodlePage(); }
+
+  // Check for conflicts on startup
   detectAndResolveConflicts(() => { renderToday(); });
 })();
 
@@ -1812,5 +2499,71 @@ renderToday();
 
 <!-- Toast -->
 <div class="save-toast" id="toast"></div>
+
+<!-- PWA Install Banner -->
+<div id="pwa-banner" style="display:none;position:fixed;bottom:20px;right:20px;background:#1e2535;border:1px solid rgba(37,99,235,.4);border-radius:12px;padding:14px 16px;z-index:300;max-width:280px;box-shadow:0 8px 32px rgba(0,0,0,.4)">
+  <div style="font-size:.85rem;font-weight:700;margin-bottom:4px">📲 Install as App</div>
+  <div style="font-size:.72rem;color:#5a7099;margin-bottom:10px">Add to home screen or desktop for quick access</div>
+  <div style="display:flex;gap:6px">
+    <button onclick="installPWA()" style="flex:1;background:#2563eb;color:#fff;border:none;border-radius:7px;padding:7px;font-size:.78rem;font-weight:600;cursor:pointer">Install</button>
+    <button onclick="document.getElementById('pwa-banner').style.display='none'" style="background:transparent;color:#5a7099;border:1px solid rgba(255,255,255,.1);border-radius:7px;padding:7px 10px;font-size:.78rem;cursor:pointer">Later</button>
+  </div>
+</div>
+
+<script>
+// ── PWA Service Worker + Install ──
+let deferredPrompt = null;
+
+// Register inline service worker for offline caching
+if('serviceWorker' in navigator) {
+  const swCode = `
+const CACHE = 'iitmandi-v1';
+const ASSETS = ['./', './index.html'];
+self.addEventListener('install', e => {
+  e.waitUntil(caches.open(CACHE).then(c => c.addAll(ASSETS)));
+  self.skipWaiting();
+});
+self.addEventListener('activate', e => {
+  e.waitUntil(caches.keys().then(keys =>
+    Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k)))
+  ));
+  self.clients.claim();
+});
+self.addEventListener('fetch', e => {
+  e.respondWith(
+    fetch(e.request).catch(() => caches.match(e.request))
+  );
+});
+  `;
+  const swBlob = new Blob([swCode], {type:'application/javascript'});
+  const swUrl  = URL.createObjectURL(swBlob);
+  navigator.serviceWorker.register(swUrl).catch(()=>{});
+}
+
+// Show install banner when browser fires beforeinstallprompt
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  // Show banner after 3 seconds
+  setTimeout(() => {
+    if(deferredPrompt) document.getElementById('pwa-banner').style.display = 'block';
+  }, 3000);
+});
+
+function installPWA() {
+  if(!deferredPrompt) return;
+  deferredPrompt.prompt();
+  deferredPrompt.userChoice.then(() => {
+    deferredPrompt = null;
+    document.getElementById('pwa-banner').style.display = 'none';
+  });
+}
+
+// Hide banner if already installed
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwa-banner').style.display = 'none';
+  deferredPrompt = null;
+});
+</script>
 </body>
 </html>
