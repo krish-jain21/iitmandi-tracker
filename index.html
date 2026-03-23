@@ -1743,7 +1743,7 @@ Rules:
     const pass1Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-1.5-flash',
         geminiPayload: {
           contents: [{ parts: pass1Parts }],
           generationConfig: { maxOutputTokens: 4000, temperature: 0.1 }
@@ -1821,7 +1821,7 @@ RULES:
     const pass2Res = await fetch('https://iitmandi-proxy.krish210005.workers.dev', {
       method:'POST', headers:{'Content-Type':'application/json'},
       body: JSON.stringify({
-        model: 'gemini-2.0-flash',
+        model: 'gemini-1.5-flash',
         geminiPayload: {
           contents: [{ parts: pass2Parts }],
           generationConfig: { maxOutputTokens: 6000, temperature: 0.1 }
